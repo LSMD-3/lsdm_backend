@@ -30,21 +30,16 @@ export abstract class AbstractService<T extends Document> {
     if (!_entity) throw new DomainError('', 404, NOT_FOUND_CODE.ENTITY_NOT_FOUND)
     delete data.__v // prevent mongoose versioning override
     Object.keys(data).forEach((field) => {
-      if (this.blackListUpdateFields[field])
-        throw new DomainError(
-          '',
-          405,
-          NOT_ALLOWED_CODE.NOT_SUPPORTED,
-          `Updating ${field} is not supported`,
-          `Updating ${field} is not supported`
-        )
+      if (this.blackListUpdateFields[field]) return
       ;(_entity as any)[field] = (data as any)[field]
     })
     return _entity.save()
   }
 
   public async get(entityid: string, projectFields?: string): Promise<any> {
-    return this.getEntityManager().findById(entityid, this.projectFieldsSearch(projectFields ?? 'base'))
+    const result = this.projectFieldsSearch(projectFields ?? 'base')
+    if (result === 'all') return this.getEntityManager().findById(entityid)
+    return this.getEntityManager().findById(entityid, result)
   }
 
   public async delete(entityid: string): Promise<any> {
@@ -52,31 +47,19 @@ export abstract class AbstractService<T extends Document> {
   }
 
   public async advancedSearch(search: GenericSearch): Promise<T[]> {
-    const transaction =
-      search.general && search.general.value
-        ? this.getEntityManager().aggregate(search.aggregate)
-        : this.getEntityManager().find(search.query)
-    if (search.limit !== undefined && search.offset !== undefined) {
-      transaction.skip(search.offset).limit(search.limit)
-    }
-
-    if (search.sortField !== undefined && search.sortDirection !== undefined) {
-      // transaction.sort([[search.sortField, search.sortDirection]])
-    }
-
+    //Quando si deve projectare qualcosa, creare la lista dei campi nella funzione projectFieldSearch e poi passarlo dentro search in projectFieldsSearch
+    search.projectFieldsSearch = this.projectFieldsSearch ? this.projectFieldsSearch(search.customProject ?? 'base') : 'all'
+    const transaction = this.getEntityManager().aggregate(search.aggregate)
+    if (search.limit !== undefined && search.offset !== undefined) transaction.skip(search.offset).limit(search.limit)
     return transaction
   }
 
   public async advancedCount(search: GenericSearch): Promise<number> {
-    const transaction =
-      search.general && search.general.value
-        ? this.getEntityManager()
-            .aggregate(search.aggregateCount)
-            .then((r) => {
-              console.log({ r })
-              return Promise.resolve(r[0] ? r[0].ct : 0)
-            })
-        : this.getEntityManager().count(search.query)
+    const transaction = this.getEntityManager()
+      .aggregate(search.aggregateCount)
+      .then((r) => {
+        return Promise.resolve(r[0] ? r[0].ct : 0)
+      })
     return transaction
   }
 }
