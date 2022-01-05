@@ -7,7 +7,7 @@ class UserService extends AbstractService<IUser> {
   public getEntityManager = () => User
   public getPermissions = () => USER_PERMISSIONS
   public projectFieldsSearch = (type: ProjectType) => {
-    if (type === 'base') return '_id logins name surname email roleId role updatedAt createdAt ignoreTokensBefore'
+    if (type === 'base') return '_id logins name surname email roleId role updatedAt createdAt ignoreTokensBefore master'
     return '_id'
   }
 
