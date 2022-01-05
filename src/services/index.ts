@@ -1,3 +1,5 @@
 export { default as RoleService } from './role.service'
 export { default as UserService } from './user.service'
 export { default as AuthService } from './auth.service'
+export { default as RestaurantService } from './restaurant.service'
+export { default as RecipeService } from './recipe.service'
