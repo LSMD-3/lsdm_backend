@@ -17,7 +17,19 @@ var Restaurant = new Schema(
     longitudine: { type: String },
     provincia: { type: String },
     cap: { type: String },
-    menu: { type: JSON },
+    menu: {
+      _id: false,
+      ayce_available: { type: Boolean },
+      name: { type: String },
+      recipes: [
+        {
+          _id: false,
+          recipe: { type: Schema.Types.ObjectId, ref: 'recipes' },
+          price: { type: Number, required: true },
+          max_quantity: { type: Number },
+        },
+      ],
+    },
   },
   {
     timestamps: true,

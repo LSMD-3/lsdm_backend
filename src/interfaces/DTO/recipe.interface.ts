@@ -1,6 +1,7 @@
 import { Document } from 'mongoose'
 
 export interface IRecipe extends Document {
+  _id: string
   recipe_name: string
   recipe_link: string
   image_url?: string

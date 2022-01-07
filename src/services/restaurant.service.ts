@@ -19,8 +19,8 @@ class RestaurantService extends AbstractService<IRestaurant> {
   blackListUpdateFields = { latitudine: 1, longitudine: 1 }
 
   public async getMenu(restaurantId: string): Promise<IMenu | undefined> {
-    const restaurant = await Restaurant.findOne({ _id: restaurantId }, 'menu')
-    if (!restaurant) return undefined
+    const restaurant = await Restaurant.findById(restaurantId, 'menu').populate('menu.recipes.recipe')
+    if (!restaurant || restaurant.menu.recipes.length === 0) return undefined
     return restaurant.menu as IMenu
   }
 
@@ -37,7 +37,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createMenu(restaurantId: string, preferences: MenuCreationPreferences): Promise<IMenu | undefined> {
-    const restaurant = await Restaurant.findOne({ _id: restaurantId }, 'nome')
+    const restaurant = await Restaurant.findById(restaurantId, 'nome')
     if (!restaurant) return undefined
 
     let n = preferences.totalRecipes
@@ -45,21 +45,19 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
     const promises: any = []
     preferences.composition.forEach((c) => {
-      if (c.percentage === 0) return
       const limit = Math.round((c.percentage / totalPercentages) * n)
+      if (limit === 0) return
       promises.push(this.fetchRecipe(c.category, limit))
     })
     const result = await Promise.all(promises)
 
-    const recipes: MenuRecipes[] = []
+    const recipes: any[] = []
 
     result.forEach((rs) => {
       rs.forEach((recipe: IRecipe) => {
         recipes.push({
           price: this.getRandomPrice(preferences.startPrice, preferences.endPrice),
-          recipe_id: recipe.id,
-          recipe_name: recipe.recipe_name,
-          image_url: recipe.image_url,
+          recipe: recipe._id,
         })
       })
     })
@@ -72,7 +70,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
     restaurant.menu = menu
     await restaurant.save()
-    return menu
+    return await this.getMenu(restaurantId)
   }
 
   public async updateMenu(): Promise<IMenu> {

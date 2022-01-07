@@ -1,11 +1,9 @@
 import { Document } from 'mongoose'
-
+import { IRecipe } from '..'
 export interface MenuRecipes {
-  recipe_id: string
-  recipe_name: string
+  recipe: IRecipe
   price: number
   max_quantity?: number
-  image_url?: string
 }
 
 export interface IMenu {
