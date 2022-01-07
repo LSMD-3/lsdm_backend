@@ -17,6 +17,7 @@ var Restaurant = new Schema(
     longitudine: { type: String },
     provincia: { type: String },
     cap: { type: String },
+    menu: { type: JSON },
   },
   {
     timestamps: true,

@@ -4,6 +4,7 @@ export interface IRecipe extends Document {
   recipe_name: string
   recipe_link: string
   image_url?: string
+  category?: string
   ingredients: { name: string; url: string }[]
 }
 
