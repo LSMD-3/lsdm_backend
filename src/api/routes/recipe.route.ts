@@ -11,7 +11,6 @@ export default (app: Router) => {
   route.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const categories = await RecipeService.getCategories()
-      console.log(categories)
       res.json(categories)
     } catch (e) {
       handleError(res, e)

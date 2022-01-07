@@ -5,6 +5,7 @@ export interface MenuRecipes {
   recipe_name: string
   price: number
   max_quantity?: number
+  image_url?: string
 }
 
 export interface IMenu {

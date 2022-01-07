@@ -10,6 +10,7 @@ const route = Router()
 export default (app: Router) => {
   app.use('/restaurant', route)
 
+  // get menu
   route.get('/menu/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const menu = await RestaurantService.getMenu(req.params.id)
@@ -20,15 +21,25 @@ export default (app: Router) => {
     }
   })
 
-  route.post('/menu', body('email').isEmail(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const menu = await RestaurantService.createMenu()
-      res.json('todo')
-    } catch (e) {
-      handleError(res, e)
+  // create menu
+  route.post(
+    '/menu/:id',
+    body('composition').exists().isArray(),
+    body('totalRecipes').exists().isNumeric(),
+    body('startPrice').exists().isNumeric(),
+    body('endPrice').exists().isNumeric(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const menu = await RestaurantService.createMenu(req.params.id, req.body)
+        res.json(menu)
+      } catch (e) {
+        handleError(res, e)
+      }
     }
-  })
+  )
 
+  // update menu
   route.put('/menu', body('email').isEmail(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const menu = await RestaurantService.updateMenu()
@@ -38,6 +49,7 @@ export default (app: Router) => {
     }
   })
 
+  // delete menu
   route.delete('/menu', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const menu = await RestaurantService.deleteMenu()
