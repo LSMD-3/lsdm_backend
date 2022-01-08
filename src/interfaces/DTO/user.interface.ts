@@ -9,7 +9,7 @@ export interface IUser extends Document {
   password: string
   roleId: string
   role?: IRole
-  master: boolean
+  userType: 'user' | 'admin' | 'chef' | 'waiter' | 'super-admin'
   logins: Date[]
   locked: boolean
   ignoreTokensBefore: Date

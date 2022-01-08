@@ -10,7 +10,7 @@ var User = new Schema(
     email: { type: String, unique: true },
     password: { type: String },
     roleId: { type: Schema.Types.ObjectId, ref: 'Role' },
-    master: { type: Boolean, default: false },
+    userType: { type: String, enum: ['user', 'admin', 'chef', 'waiter', 'super-admin'], default: 'user' },
     logins: { type: [Date], default: [] },
     locked: { type: Boolean, default: false },
     ignoreTokensBefore: { type: Date }, //Used to invalidate sessions

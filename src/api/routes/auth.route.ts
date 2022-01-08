@@ -19,10 +19,10 @@ export default (app: Router) => {
         const { email, password } = req.body
 
         const userTokens = await AuthService.login(email, password)
-        const user = await User.findOne({ email }, 'name surname')
+        const user = await User.findOne({ email }, 'name surname userType')
         if (!user) throw new Error('User not found')
 
-        res.json({ email, name: user.name, surname: user.surname, ...userTokens })
+        res.json({ email, name: user.name, surname: user.surname, userType: user.userType, ...userTokens })
       } catch (e) {
         handleError(res, e)
       }
@@ -40,7 +40,7 @@ export default (app: Router) => {
       try {
         const { email, password, name, surname } = req.body
         const userTokens = await AuthService.signup(email, password, name, surname)
-        res.json({ email, name, surname, ...userTokens })
+        res.json({ email, name, surname, userType: 'user', ...userTokens })
       } catch (e) {
         handleError(res, e)
       }

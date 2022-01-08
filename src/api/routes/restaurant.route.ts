@@ -10,6 +10,23 @@ const route = Router()
 export default (app: Router) => {
   app.use('/restaurant', route)
 
+  route.post('/order/add', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await RestaurantService.addOrder()
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/search/:text', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const restaurants = await RestaurantService.searchRestaurant(req.params.text)
+      res.json(restaurants)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   // get menu
   route.get('/menu/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {

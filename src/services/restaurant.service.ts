@@ -1,4 +1,5 @@
 import { IMenu, IRecipe, IRestaurant, MenuRecipes, RESTAURANT_PERMISSIONS } from '@/interfaces'
+import RedisClient from '@/loaders/redis'
 import { Restaurant, Recipe } from '@/models'
 import { AbstractService, ProjectType } from './abstract.service'
 
@@ -17,6 +18,15 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return '_id'
   }
   blackListUpdateFields = { latitudine: 1, longitudine: 1 }
+
+  public async addOrder() {
+    RedisClient.db.HSET('table', 'key1', 'value1')
+  }
+
+  public async searchRestaurant(text: string) {
+    const restaurants = await Restaurant.find({ nome: { $regex: `${text}`, $options: 'i' } }, 'nome').limit(5)
+    return restaurants
+  }
 
   public async getMenu(restaurantId: string): Promise<IMenu | undefined> {
     const restaurant = await Restaurant.findById(restaurantId, 'menu').populate('menu.recipes.recipe')
