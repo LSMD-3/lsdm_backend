@@ -72,13 +72,29 @@ export default (app: Router) => {
   
   //User Likes Restaurant
   route.post(
-    '/like',
+    '/likeRestaurant',
     body('user').isString(),
     body('restaurant').isString(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const result = await Neo4jService.userLikesRestaurant(req.body.user, req.body.restaurant)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  //User Likes Recipe
+  route.post(
+    '/likeRecipe',
+    body('user').isString(),
+    body('recipe').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.userLikesRecipe(req.body.user, req.body.recipe)
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -101,6 +117,70 @@ export default (app: Router) => {
       }
     }
   )
+  
+  //User Unfollows User
+  route.post(
+    '/unfollowUser',
+    body('follower').isString(),
+    body('followee').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.userUnfollowsUser(req.body.follower, req.body.followee)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  //User Unlikes Recipe
+  route.post(
+    '/unlikeRecipe',
+    body('user').isString(),
+    body('recipe').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.userUnlikesRecipe(req.body.user, req.body.recipe)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  //User Unlikes Restaurant
+  route.post(
+    '/unlikeRestaurant',
+    body('user').isString(),
+    body('restaurant').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.userUnlikesRestaurant(req.body.user, req.body.restaurant)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+  
+  //Recipe Unavailable in Restaurant
+  route.post(
+    '/unavailableRecipe',
+    body('recipe').isString(),
+    body('restaurant').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.recipeUnavailableRestaurant(req.body.recipe, req.body.restaurant)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
 
   //Delete All Nodes
   route.delete(
@@ -115,4 +195,32 @@ export default (app: Router) => {
       }
     }
   )
+
+  //Search for Users
+  route.get(
+    '/search/:user',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await Neo4jService.searchUsers(req.params.user)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  //Get Total Followers
+  route.get(
+    '/followers/:user',
+    async (req: Request, res: Response, next: NextFunction) => {
+      
+      try {
+        const result = await Neo4jService.getTotalFollows(req.params.user)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
 }
