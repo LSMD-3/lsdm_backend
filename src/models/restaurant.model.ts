@@ -17,6 +17,9 @@ var Restaurant = new Schema(
     longitudine: { type: String },
     provincia: { type: String },
     cap: { type: String },
+    chefs: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+    waiters: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+    admins: [{ type: Schema.Types.ObjectId, ref: 'users' }],
     menu: {
       _id: false,
       ayce_available: { type: Boolean },

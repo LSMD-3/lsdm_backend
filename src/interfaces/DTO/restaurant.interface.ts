@@ -1,5 +1,5 @@
 import { Document } from 'mongoose'
-import { IRecipe } from '..'
+import { IRecipe, IUser } from '..'
 export interface MenuRecipes {
   recipe: IRecipe
   price: number
@@ -27,6 +27,9 @@ export interface IRestaurant extends Document {
   longitudine: string
   provincia: string
   cap: string
+  chefs: string[]
+  waiters: string[]
+  admins: string[]
   menu: IMenu
 }
 

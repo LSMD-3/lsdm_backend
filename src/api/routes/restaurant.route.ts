@@ -1,4 +1,5 @@
 import { DomainError } from '@/exceptions'
+import { UserType } from '@/interfaces'
 import { RestaurantService } from '@/services'
 import { NextFunction, Request, Response, Router } from 'express'
 import { body } from 'express-validator'
@@ -13,6 +14,32 @@ export default (app: Router) => {
   route.post('/order/add', async (req: Request, res: Response, next: NextFunction) => {
     try {
       await RestaurantService.addOrder()
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.post(
+    '/staff',
+    body('restaurantId').isString(),
+    body('userId').isString(),
+    body('userType').isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { restaurantId, userId, userType } = req.body
+        const result = await RestaurantService.addStaffToRestaurant(restaurantId, userId, userType)
+        res.json(result)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.get('/staff/:userId/:userType', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await RestaurantService.findRestaurantOfStaff(req.params.userId, req.params.userType as UserType)
+      res.json(result)
     } catch (e) {
       handleError(res, e)
     }
