@@ -13,6 +13,11 @@ class UserService extends AbstractService<IUser> {
 
   public blackListUpdateFields = { logins: 1 }
 
+  public async getEmailByIds(ids: string[]) {
+    const emails = await User.find({ _id: { $in: ids } }, 'email')
+    return emails
+  }
+
   public async invalidateSessions(id: string, date: Date) {
     let user = await this.getEntityManager().findById(id)
     if (!user) throw new DomainError('', 404, NOT_FOUND_CODE.ENTITY_NOT_FOUND, 'User not found', 'User not found')

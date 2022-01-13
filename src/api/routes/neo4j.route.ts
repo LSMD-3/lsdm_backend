@@ -9,19 +9,14 @@ export default (app: Router) => {
   app.use('/neo4j', route)
 
   //Add User Route
-  route.post(
-    '/adduser',
-    body('user').exists(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const result = await Neo4jService.addUser(req.body.user)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.post('/adduser', body('user').exists(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.addUser(req.body.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //Add Recipe Route
   route.post(
@@ -38,21 +33,16 @@ export default (app: Router) => {
       }
     }
   )
-  
+
   //Add Restaurant Route
-  route.post(
-    '/addrestaurant',
-    body('restaurant').exists(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const result = await Neo4jService.addRestaurant(req.body.restaurant)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.post('/addrestaurant', body('restaurant').exists(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.addRestaurant(req.body.restaurant)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //User Follows User
   route.post(
@@ -69,7 +59,7 @@ export default (app: Router) => {
       }
     }
   )
-  
+
   //User Likes Restaurant
   route.post(
     '/likeRestaurant',
@@ -110,14 +100,14 @@ export default (app: Router) => {
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const result = await Neo4jService.recipeFoundInRestaurant(req.body.recipe,req.body.restaurant)
+        const result = await Neo4jService.recipeFoundInRestaurant(req.body.recipe, req.body.restaurant)
         res.json(result)
       } catch (e) {
         handleError(res, e)
       }
     }
   )
-  
+
   //User Unfollows User
   route.post(
     '/unfollowUser',
@@ -165,7 +155,7 @@ export default (app: Router) => {
       }
     }
   )
-  
+
   //Recipe Unavailable in Restaurant
   route.post(
     '/unavailableRecipe',
@@ -183,44 +173,32 @@ export default (app: Router) => {
   )
 
   //Delete All Nodes
-  route.delete(
-    '/deleteAll',
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const result = await Neo4jService.deleteNodes()
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.delete('/deleteAll', validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.deleteNodes()
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //Search for Users
-  route.get(
-    '/search/:user',
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const result = await Neo4jService.searchUsers(req.params.user)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.get('/search/:user', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.searchUsers(req.params.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //Get Total Followers
-  route.get(
-    '/followers/:user',
-    async (req: Request, res: Response, next: NextFunction) => {
-      
-      try {
-        const result = await Neo4jService.getTotalFollows(req.params.user)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.get('/followers/:user', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.getTotalFollowers(req.params.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
-
+  })
 }

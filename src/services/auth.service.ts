@@ -3,6 +3,7 @@ import { IUser } from '@/interfaces'
 import { User } from '@/models'
 import config from '@/config'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
+import neo4jService from './neo4j.service'
 const ISSUER = 'node-express-mongo-boilerplate'
 export interface JwtUserTokenValues {
   iss: string
@@ -72,6 +73,7 @@ class AuthService {
       const userTokens = this.generateJWT(user)
       user.logins.push(new Date())
       await user.save()
+      neo4jService.addUser(user._id)
       return userTokens
     } catch (e) {
       throw e
