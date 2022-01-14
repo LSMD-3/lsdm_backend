@@ -12,10 +12,6 @@ const connectToRedis = async () => {
 
   await client.connect()
 
-  await client.set('key', 'value')
-  const value = await client.get('key')
-  console.log(value)
-
   return client
 }
 

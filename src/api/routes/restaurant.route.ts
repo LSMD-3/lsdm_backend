@@ -10,13 +10,60 @@ const route = Router()
 export default (app: Router) => {
   app.use('/restaurant', route)
 
-  route.post('/order/add', async (req: Request, res: Response, next: NextFunction) => {
+  route.post('/get_all', body('map').exists().isString(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await RestaurantService.addOrder()
+      const response = await RestaurantService.getall(req.body.map)
+      res.json(response)
     } catch (e) {
       handleError(res, e)
     }
   })
+  route.post('/get_tables', body('map').exists().isString(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await RestaurantService.getall(req.body.map)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.post(
+    '/create_table',
+    body('restaurant_id').exists().isString(),
+    body('table_id').exists().isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.createTable(req.body.restaurant_id, req.body.table_id)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+  route.post(
+    '/order/create_order',
+    body('restaurant_id').exists().isString(),
+    body('table_id').exists().isString(),
+    body('orders').exists().isArray(),
+    body('quantities').exists().isArray(),
+    body('notes').exists().isArray(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.createOrder(
+          req.body.restaurant_id,
+          req.body.table_id,
+          req.body.orders,
+          req.body.quantities,
+          req.body.notes
+        )
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
 
   route.get('/search/:text', async (req: Request, res: Response, next: NextFunction) => {
     try {
