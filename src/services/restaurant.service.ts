@@ -73,6 +73,8 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async createOrder(restaurant_id: string, table_id: string, orders: any[]) {
     var table_exists = await RedisClient.db.HEXISTS('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
+    console.log(table_exists)
+    console.log(table_id)
     if (!table_exists) {
       //Check if table exists
       return 'The table does not exist'
@@ -127,10 +129,11 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
     var result = await this.getall('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
 
+    const orders = []
     for (let i = 1; i < Object.keys(result).length + 1; i++) {
-      result[String(i)] = JSON.parse(result[String(i)])
+      orders.push(JSON.parse(result[String(i)]))
     }
-    return result
+    return orders.reverse()
     //return JSON.parse(result)
   }
 
