@@ -73,8 +73,6 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async createOrder(restaurant_id: string, table_id: string, orders: any[]) {
     var table_exists = await RedisClient.db.HEXISTS('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
-    console.log(table_exists)
-    console.log(table_id)
     if (!table_exists) {
       //Check if table exists
       return 'The table does not exist'
