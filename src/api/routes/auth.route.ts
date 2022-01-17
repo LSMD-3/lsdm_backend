@@ -22,7 +22,7 @@ export default (app: Router) => {
         const user = await User.findOne({ email }, 'name surname userType')
         if (!user) throw new Error('User not found')
 
-        res.json({ email, name: user.name, surname: user.surname, userType: user.userType, ...userTokens })
+        res.json({ _id: user._id, email, name: user.name, surname: user.surname, userType: user.userType, ...userTokens })
       } catch (e) {
         handleError(res, e)
       }
