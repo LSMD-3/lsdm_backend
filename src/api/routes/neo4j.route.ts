@@ -195,10 +195,30 @@ export default (app: Router) => {
   //Get Total Followers
   route.get('/followers/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await Neo4jService.getTotalFollowers(req.params.user)
+      const result = await Neo4jService.getFollowers(req.params.user)
       res.json(result)
     } catch (e) {
       handleError(res, e)
+    }
+  })
+
+  //Get Total Follows Count
+  route.get('/follows/:user', async (req: Request, res: Response, next: NextFunction)=>{
+    try {
+      const result = await Neo4jService.getTotalFollows(req.params.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res,e)
+    }
+  })
+
+  //Get Total Follows IDs
+  route.get('/followsId/:user', async (req:Request, res:Response, next:NextFunction)=>{
+    try {
+      const result = await Neo4jService.getTotalFollowsID(req.params.user)
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
     }
   })
 }

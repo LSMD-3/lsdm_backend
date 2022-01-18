@@ -24,6 +24,11 @@ class UserService extends AbstractService<IUser> {
     user.ignoreTokensBefore = date ?? new Date()
     await user.save()
   }
+
+  public async getEmailsOfFollows(ids: string[]){
+    const emails = await User.find({'_id': {'$in': ids}}, 'email')
+    return emails
+  }
 }
 
 export default new UserService()
