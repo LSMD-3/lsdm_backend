@@ -1,4 +1,5 @@
-import { UserService } from '@/services'
+import { User } from '@/models'
+import { Neo4jService, UserService } from '@/services'
 import neo4jService from '@/services/neo4j.service'
 import { NextFunction, Request, Response, Router } from 'express'
 import { body, param } from 'express-validator'
@@ -37,6 +38,17 @@ export default (app: Router) => {
       }
     }
   )
+
+  route.get('/followsemails/:userId', async (req:Request, res:Response, next:NextFunction)=>{
+    try {
+      // console.log(req.params.userId);
+      const followsIds = await Neo4jService.getTotalFollowsID(req.params.userId)
+      const emails = await UserService.getEmailsOfFollows(followsIds)
+      res.json(emails)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
 
   abstractRoute(route, UserService)
 }
