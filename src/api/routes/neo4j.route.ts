@@ -60,6 +60,15 @@ export default (app: Router) => {
     }
   )
 
+  route.get('/likedRestaurant/:user', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.getLikedRestaurants(req.params.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   //User Likes Restaurant
   route.post(
     '/likeRestaurant',
@@ -203,17 +212,17 @@ export default (app: Router) => {
   })
 
   //Get Total Follows Count
-  route.get('/follows/:user', async (req: Request, res: Response, next: NextFunction)=>{
+  route.get('/follows/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await Neo4jService.getTotalFollows(req.params.user)
       res.json(result)
     } catch (e) {
-      handleError(res,e)
+      handleError(res, e)
     }
   })
 
   //Get Total Follows IDs
-  route.get('/followsId/:user', async (req:Request, res:Response, next:NextFunction)=>{
+  route.get('/followsId/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await Neo4jService.getTotalFollowsID(req.params.user)
       res.json(result)

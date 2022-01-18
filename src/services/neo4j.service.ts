@@ -32,8 +32,16 @@ class Neo4jService {
     return `${userId_1} now FOLLOWS ${userId_2}`
   }
 
+  public async addRestaurantIfNotExist(restaurant: string) {
+    const session1 = Neo4jClient.driver.session()
+    const session2 = Neo4jClient.driver.session()
+    const exist = (await session1.run(`MATCH  (r:Restaurant {id:"${restaurant}"}) RETURN r`)).records.length
+    if (!exist) await session2.run(`CREATE  (r:Restaurant {id:"${restaurant}"}) RETURN r`)
+  }
+
   public async userLikesRestaurant(userId: string, restaurant: string): Promise<any> {
     //Method to like a Restaurant
+    await this.addRestaurantIfNotExist(restaurant)
     const session = Neo4jClient.driver.session()
     await session.run(`MATCH (u:User {id:"${userId}"}), (r:Restaurant {id:"${restaurant}"}) MERGE (u)-[l:LIKES]->(r) RETURN u, r`)
     return `${userId} LIKED ${restaurant}`
@@ -85,9 +93,7 @@ class Neo4jService {
 
   public async recipeUnavailableRestaurant(recipe: string, restaurant: string): Promise<any> {
     const session = Neo4jClient.driver.session()
-    await session.run(
-      `MATCH (rec:Recipe {id: '${recipe}'}), (res:Restaurant {id:'${restaurant}'}) MATCH (rec)-[f:FOUND]->(res) DELETE f`
-    )
+    await session.run(`MATCH (rec:Recipe {id: '${recipe}'}), (res:Restaurant {id:'${restaurant}'}) MATCH (rec)-[f:FOUND]->(res) DELETE f`)
     return `${recipe} NOT FOUND ${restaurant}`
   }
 
@@ -133,12 +139,21 @@ class Neo4jService {
     })
   }
 
-  public async getTotalFollowsID(userId: string): Promise<any>{
+  public async getTotalFollowsID(userId: string): Promise<any> {
     //Method to get the ID of those you are following
     const session = Neo4jClient.driver.session()
-    const results =await session.run(`MATCH (u:User {id:"${userId}"})-[FOLLOWS]->(u2:User) return u2`)
-    return results.records.map((f)=>{
+    const results = await session.run(`MATCH (u:User {id:"${userId}"})-[FOLLOWS]->(u2:User) return u2`)
+    return results.records.map((f) => {
       const followIds = f.get('u2')
+      return followIds.properties.id
+    })
+  }
+
+  public async getLikedRestaurants(userId: string) {
+    const session = Neo4jClient.driver.session()
+    const results = await session.run(`MATCH (u:User {id:"${userId}"})-[LIKES]->(r:Restaurant)return r`)
+    return results.records.map((f) => {
+      const followIds = f.get('r')
       return followIds.properties.id
     })
   }

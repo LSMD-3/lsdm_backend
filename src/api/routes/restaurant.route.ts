@@ -210,5 +210,20 @@ export default (app: Router) => {
     }
   })
 
+  // create menu
+  route.post(
+    '/restaurantsByIds',
+    body('restaurantIds').exists().isArray(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const restaurants = await RestaurantService.findRestaurantByIds(req.body.restaurantIds)
+        res.json(restaurants)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
   abstractRoute(route, RestaurantService)
 }

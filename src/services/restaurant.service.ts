@@ -191,6 +191,11 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return price
   }
 
+  public async findRestaurantByIds(restaurantIds: string[]) {
+    const restaurants = await Restaurant.find({ _id: { $in: restaurantIds } }, 'nome')
+    return restaurants
+  }
+
   public async createMenu(restaurantId: string, preferences: MenuCreationPreferences): Promise<IMenu | undefined> {
     const restaurant = await Restaurant.findById(restaurantId, 'nome')
     if (!restaurant) return undefined
