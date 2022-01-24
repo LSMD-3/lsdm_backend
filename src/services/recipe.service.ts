@@ -50,6 +50,11 @@ class RecipeService extends AbstractService<IRecipe> {
     ])
     return categories
   }
+
+  public async getRecipesByIds(ids: string[]) {
+    const recipes = await Recipe.find({ _id: { $in: ids } })
+    return recipes
+  }
 }
 
 export default new RecipeService()

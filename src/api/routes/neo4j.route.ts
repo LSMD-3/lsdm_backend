@@ -69,6 +69,15 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/likedRecipe/:user', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await Neo4jService.getLikedRecipes(req.params.user)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   //User Likes Restaurant
   route.post(
     '/likeRestaurant',

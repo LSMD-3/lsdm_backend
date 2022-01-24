@@ -157,6 +157,15 @@ class Neo4jService {
       return followIds.properties.id
     })
   }
+
+  public async getLikedRecipes(userId: string) {
+    const session = Neo4jClient.driver.session()
+    const results = await session.run(`MATCH (u:User {id:"${userId}"})-[LIKES]->(r:Recipe)return r`)
+    return results.records.map((f) => {
+      const followIds = f.get('r')
+      return followIds.properties.id
+    })
+  }
 }
 
 export default new Neo4jService()
