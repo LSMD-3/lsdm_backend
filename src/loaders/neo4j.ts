@@ -4,7 +4,8 @@ import { Driver } from 'neo4j-driver-core'
 const connectToNeo4j = async () => {
   console.log('Starting Neo4j..')
 
-  let driver = neo4j.driver('bolt://52.90.199.112:7687', neo4j.auth.basic('neo4j', 'tear-perforation-mittens'))
+  const driver = neo4j.driver('bolt://3.83.230.93:7687',
+                  neo4j.auth.basic('neo4j', 'events-language-components'))
   
   return driver
 }

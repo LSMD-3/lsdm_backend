@@ -111,14 +111,83 @@ export default (app: Router) => {
   )
 
   route.post(
+    '/table/check_out',
+    body('restaurant_id').exists(),
+    body('table_id').exists(),
+
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.checkout_Table(req.body.restaurant_id, req.body.table_id)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.post(
     '/order/create_order',
     body('restaurant_id').exists().isString(),
     body('table_id').exists().isString(),
+    body('user_id').exists().isString(),
     body('orders').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.createOrder(req.body.restaurant_id, req.body.table_id, req.body.orders)
+        const response = await RestaurantService.createOrder(req.body.restaurant_id, req.body.table_id, req.body.user_id, req.body.orders)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.post(
+    '/update_order',
+    body('restaurant_id').exists().isString(),
+    body('table_id').exists().isString(),
+    body('order_index').exists(),
+    body('orders').exists(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.update_order(
+          req.body.restaurant_id,
+          req.body.table_id,
+          req.body.order_index,
+          req.body.orders
+        )
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.post(
+    '/table/get_orders_for_user',
+    body('restaurant_id').exists().isString(),
+    body('table_id').exists().isString(),
+    body('user_id').exists().isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.get_orders_for_user(req.body.restaurant_id, req.body.table_id, req.body.user_id)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+  route.post(
+    '/get_table_users',
+    body('restaurant_id').exists().isString(),
+    body('table_id').exists().isString(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.get_table_users(req.body.restaurant_id, req.body.table_id)
         res.json(response)
       } catch (e) {
         handleError(res, e)

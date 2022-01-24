@@ -48,7 +48,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createTable(restaurant_id: string, table_id: string, customers: string, status: string) {
-    await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_customers', customers)
+    await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_customers', JSON.stringify({ id_1: customers }))
     await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_status', status)
     return 'VR_' + restaurant_id + '_Table_' + table_id
   }
@@ -71,7 +71,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return 'ok'
   }
 
-  public async createOrder(restaurant_id: string, table_id: string, orders: any[]) {
+  public async createOrder(restaurant_id: string, table_id: string, user_id: string, orders: any[]) {
     var table_exists = await RedisClient.db.HEXISTS('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
     if (!table_exists) {
       //Check if table exists
@@ -80,14 +80,16 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
     let orders_len: number = 0
     let exists = await RedisClient.db.HLEN('VR_' + restaurant_id + '_Table_' + table_id + '_Orders')
-
     if (exists == 0) {
       //check if orders exists
-      await this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', String(1), JSON.stringify(orders))
+      this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', String(1), JSON.stringify(orders))
+      this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_to_users', String(1), user_id)
+
       return exists
     } else {
       orders_len = exists + 1
       this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', String(orders_len), JSON.stringify(orders))
+      this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_to_users', String(orders_len), user_id)
     }
 
     return 'ok'
@@ -109,16 +111,68 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return result1
   }
 
-  public async clone(restaurant_id: any, table_id: any) {
+  public async clone(source: string, destination: string) {
+    let res = await this.redis_clone(source, destination)
+    return res
+  }
+
+  public async checkout_Table(restaurant_id: any, table_id: any) {
     let exists = await this.exist('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
     if (exists !== 0) {
-      let res = await this.redis_clone(
-        String('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders'),
-        String('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders_copy')
+      let order_hist_number = await RedisClient.db.HLEN('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History')
+      console.log(order_hist_number)
+      await this.hset(
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History',
+        String(order_hist_number + 1),
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History_' + String(order_hist_number + 1)
       )
-      return res
+      await this.hset(
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History_to_users',
+        String(order_hist_number + 1),
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History_to_users_' + String(order_hist_number + 1)
+      )
+      let res = await this.clone(
+        String('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders'),
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History_' + String(order_hist_number + 1)
+      )
+      let res1 = await this.clone(
+        String('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders_to_users'),
+        'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History_to_users_' + String(order_hist_number + 1)
+      )
+
+      let del = await RedisClient.db.DEL('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
+      del = await RedisClient.db.DEL('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders_to_users')
+      del = await RedisClient.db.DEL('VR_' + String(restaurant_id))
+      //return del
     }
     return 'something went wrong'
+  }
+
+  public async get_orders_for_user(restaurant_id: string, table_id: string, user_id: string) {
+    let orders = await this.get_all_orders(restaurant_id, table_id)
+
+    let users = await RedisClient.db.HGETALL('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_to_users')
+    console.log(orders)
+    orders = orders.reverse()
+    let user_orders = []
+    console.log(users)
+    for (let i = 0; i < Object.keys(orders).length; i++) {
+      if (user_id === users[String(i + 1)]) {
+        user_orders.push(orders[i])
+      }
+    }
+    return user_orders.reverse()
+  }
+
+  public async get_table_users(restaurant_id: string, table_id: string) {
+    let users = await this.hget('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
+    return JSON.parse(users)
+  }
+
+  public async update_order(restaurant_id: string, table_id: string, order_index: any, order: any) {
+    console.log(order_index)
+    this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', order_index, JSON.stringify(order))
+    return 'ok'
   }
 
   public async get_all_orders(restaurant_id: any, table_id: any) {
