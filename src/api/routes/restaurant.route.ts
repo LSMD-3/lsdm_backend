@@ -164,6 +164,20 @@ export default (app: Router) => {
       }
     }
   )
+  route.post(
+    '/get_orders_for_chef',
+    body('restaurant_id').exists().isString(),
+
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.get_orders_for_chef(req.body.restaurant_id)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
 
   route.post(
     '/table/get_orders_for_user',

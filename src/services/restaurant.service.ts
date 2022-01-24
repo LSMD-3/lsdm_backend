@@ -14,6 +14,18 @@ interface MenuCreationPreferences {
   endPrice: number
 }
 
+type Order = {
+  _id: string
+  qty: number
+  note?: string
+  status?: string
+}[]
+
+type TableOrder = {
+  tableId: string
+  orders: Order[]
+}
+
 class RestaurantService extends AbstractService<IRestaurant> {
   public getEntityManager = () => Restaurant
   public getPermissions = () => RESTAURANT_PERMISSIONS
@@ -48,13 +60,13 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createTable(restaurant_id: string, table_id: string, customers: string, status: string) {
-    await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_customers', JSON.stringify({ id_1: customers }))
+    await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_customers', customers)
     await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_status', status)
     return 'VR_' + restaurant_id + '_Table_' + table_id
   }
 
   public async join_table(restaurant_id: string, table_id: string, customer: any) {
-    var table_exists = await this.exist('VR_' + restaurant_id)
+    var table_exists = await this.exist('VR_' + restaurant_id + '_Table_' + table_id)
 
     if (table_exists === 0) {
       var to_insert_customers = JSON.stringify({ id_1: customer })
@@ -162,6 +174,20 @@ class RestaurantService extends AbstractService<IRestaurant> {
       }
     }
     return user_orders.reverse()
+  }
+
+  public async get_orders_for_chef(restaurant_id: string) {
+    let keys = await RedisClient.db.HKEYS('VR_' + restaurant_id)
+    const result: TableOrder[] = []
+
+    for (let i = 0; i < keys.length; i += 2) {
+      let table_sting = keys[i].split('_')
+      let table_id = table_sting[1]
+      let orders = await this.get_all_orders(restaurant_id, table_id)
+      orders = orders.reverse()
+      result.push({ tableId: table_id, orders })
+    }
+    return result
   }
 
   public async get_table_users(restaurant_id: string, table_id: string) {
