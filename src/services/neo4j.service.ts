@@ -28,7 +28,7 @@ class Neo4jService {
   public async userFollowUser(userId_1: string, userId_2: string): Promise<any> {
     //Method to follow another User
     const session = Neo4jClient.driver.session()
-    await session.run(`MATCH (u1:User {id:"${userId_1}"}), (u2:User {id:"${userId_2}"}) MERGE (u1)-[r:FOLLOWS]->(u2) RETURN u1, u2`)
+    await session.run(`MERGE (u1:User {id:"${userId_1}"}) MERGE(u2:User {id:"${userId_2}"}) MERGE (u1)-[r:FOLLOWS]->(u2) RETURN u1, u2`)
     return `${userId_1} now FOLLOWS ${userId_2}`
   }
 
@@ -43,14 +43,14 @@ class Neo4jService {
     //Method to like a Restaurant
     await this.addRestaurantIfNotExist(restaurant)
     const session = Neo4jClient.driver.session()
-    await session.run(`MATCH (u:User {id:"${userId}"}), (r:Restaurant {id:"${restaurant}"}) MERGE (u)-[l:LIKES]->(r) RETURN u, r`)
+    await session.run(`MERGE (u:User {id:"${userId}"}) MERGE(r:Restaurant {id:"${restaurant}"}) MERGE (u)-[l:LIKES]->(r) RETURN u, r`)
     return `${userId} LIKED ${restaurant}`
   }
 
   public async userLikesRecipe(userId: string, recipe: string): Promise<any> {
     //Method to like a Recipe by User
     const session = Neo4jClient.driver.session()
-    await session.run(`MATCH (u:User {id:"${userId}"}), (r:Recipe {id:"${recipe}"}) MERGE (u)-[l:LIKES]->(r) RETURN u, r`)
+    await session.run(`MERGE (u:User {id:"${userId}"}) MERGE(r:Recipe {id:"${recipe}"}) MERGE (u)-[l:LIKES]->(r) RETURN u, r`)
     return `${userId} LIKED ${recipe}`
   }
 
