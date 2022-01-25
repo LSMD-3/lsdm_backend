@@ -1,6 +1,6 @@
 import { DomainError } from '@/exceptions'
 import { UserType } from '@/interfaces'
-import { User } from '@/models'
+import { Restaurant, User } from '@/models'
 import { RestaurantService } from '@/services'
 import { NextFunction, Request, Response, Router } from 'express'
 import { body } from 'express-validator'
@@ -307,6 +307,24 @@ export default (app: Router) => {
       }
     }
   )
+
+  route.get('/noMenu/:limit', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const restaurants = await Restaurant.find({ menu: null }, 'nome').limit(Number(req.params.limit) ?? 10)
+      res.json(restaurants)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/withMenu/:limit', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const restaurants = await Restaurant.find({ menu: { $ne: null } }, 'nome').limit(Number(req.params.limit) ?? 10)
+      res.json(restaurants)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
 
   abstractRoute(route, RestaurantService)
 }

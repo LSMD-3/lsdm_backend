@@ -20,6 +20,7 @@ var Restaurant = new Schema(
     chefs: [{ type: Schema.Types.ObjectId, ref: 'users' }],
     waiters: [{ type: Schema.Types.ObjectId, ref: 'users' }],
     admins: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+    tables_number: { type: Number, default: 10 },
     menu: {
       _id: false,
       ayce_available: { type: Boolean },

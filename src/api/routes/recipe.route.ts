@@ -3,6 +3,7 @@ import { NextFunction, Request, Response, Router } from 'express'
 import abstractRoute from './abstract-route'
 import { body } from 'express-validator'
 import { handleError, validateInput } from '../middlewares'
+import { Recipe } from '@/models'
 
 const route = Router()
 
@@ -31,6 +32,16 @@ export default (app: Router) => {
       }
     }
   )
+
+  route.get('/sample/:limit', async (req: Request, res: Response, next: NextFunction) => {
+    const limit = Number(req.params.limit) ?? 10
+    try {
+      const recipes = await Recipe.aggregate([{ $sample: { size: limit } }, { $project: { recipe_name: 1 } }])
+      res.json(recipes)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
 
   abstractRoute(route, RecipeService)
 }
