@@ -77,17 +77,13 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async join_table(restaurant_id: string, table_id: string, customer: any) {
-    var table_exists = await this.exist('VR_' + restaurant_id + '_Table_' + table_id)
+    var table_exists = await RedisClient.db.HEXISTS('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
 
-    if (table_exists === 0) {
-      var to_insert_customers = JSON.stringify({ id_1: customer })
-      await this.createTable(restaurant_id, table_id, to_insert_customers, 'occupied')
+    if (!table_exists) {
+      await this.createTable(restaurant_id, table_id, customer, 'occupied')
     } else {
       let customers = await this.hget('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
-      let obj = JSON.parse(customers)
-      let count = Object.keys(obj).length + 1
-      obj['id_' + count] = customer
-      let to_save = JSON.stringify(obj)
+      let to_save = customers + ',' + customer
       this.hset('VR_' + restaurant_id, 'Table_' + table_id + '_customers', to_save)
       this.hset('VR_' + restaurant_id, 'Table_' + table_id + '_status', 'occupied')
     }
@@ -143,7 +139,6 @@ class RestaurantService extends AbstractService<IRestaurant> {
     let exists = await this.exist('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
     if (exists !== 0) {
       let order_hist_number = await RedisClient.db.HLEN('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History')
-      console.log(order_hist_number)
       await this.hset(
         'VR_' + restaurant_id + '_Table_' + table_id + '_Orders_History',
         String(order_hist_number + 1),
@@ -175,10 +170,8 @@ class RestaurantService extends AbstractService<IRestaurant> {
     let orders = await this.get_all_orders(restaurant_id, table_id)
 
     let users = await RedisClient.db.HGETALL('VR_' + restaurant_id + '_Table_' + table_id + '_Orders_to_users')
-    console.log(orders)
     orders = orders.reverse()
     let user_orders = []
-    console.log(users)
     for (let i = 0; i < Object.keys(orders).length; i++) {
       if (user_id === users[String(i + 1)]) {
         user_orders.push(orders[i])
@@ -198,19 +191,15 @@ class RestaurantService extends AbstractService<IRestaurant> {
       orders = orders.reverse()
       result.push({ tableId: table_id, orders })
     }
-    console.log(result)
     return result
   }
 
   public async get_table_users(restaurant_id: string, table_id: string) {
     let users = await this.hget('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
-    return JSON.parse(users)
+    return users.split(',')
   }
 
   public async update_order(restaurant_id: string, table_id: string, order_index: any, order: any) {
-    console.log(order_index)
-    console.log('IN UPDATE')
-    console.log(order)
     this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', String(parseInt(order_index) + 1), JSON.stringify(order))
     return 'ok'
   }
@@ -220,7 +209,6 @@ class RestaurantService extends AbstractService<IRestaurant> {
     //return 'VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders'
 
     var result = await this.getall('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
-    console.log(result)
     const orders = []
     for (let i = 1; i < Object.keys(result).length + 1; i++) {
       orders.push(JSON.parse(result[String(i)]))

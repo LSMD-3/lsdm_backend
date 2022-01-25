@@ -1,5 +1,6 @@
 import { DomainError } from '@/exceptions'
 import { UserType } from '@/interfaces'
+import { User } from '@/models'
 import { RestaurantService } from '@/services'
 import { NextFunction, Request, Response, Router } from 'express'
 import { body } from 'express-validator'
@@ -52,10 +53,8 @@ export default (app: Router) => {
     body('customer').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
-      console.log(req.body)
       try {
         const response = await RestaurantService.join_table(req.body.restaurant_id, req.body.table_id, req.body.customer)
-
         res.json(response)
       } catch (e) {
         handleError(res, e)
@@ -201,8 +200,9 @@ export default (app: Router) => {
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.get_table_users(req.body.restaurant_id, req.body.table_id)
-        res.json(response)
+        const userIds = await RestaurantService.get_table_users(req.body.restaurant_id, req.body.table_id)
+        const users = await User.find({ _id: { $in: userIds } }, 'name surname')
+        res.json(users)
       } catch (e) {
         handleError(res, e)
       }

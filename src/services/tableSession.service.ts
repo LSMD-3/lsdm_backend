@@ -50,8 +50,6 @@ class TableSessionService extends AbstractService<ITableSession> {
         const user: string = order_list_users[index]
         ordersToSave = ordersToSave.concat(this.extractOrdersfromRawValues(order, user, index))
       })
-      console.log('°°°°°°HERE°°°°°°°°°°')
-      console.log(ordersToSave)
       const partecipants = [...new Set(order_list_users)]
       console.log(partecipants)
       const session = new TableSession({ restaurantId: restaurant, tableId: table, partecipants, orders: ordersToSave })
@@ -82,11 +80,7 @@ class TableSessionService extends AbstractService<ITableSession> {
 
     const result = await Promise.all(promises)
 
-    // 2. retrive restaurant (by id) table session
-    // 3. save the table sessions of the restaurant on mongo
-
-    // result.push({ restauranId: 1234567, total_sessions: 100 })
-    await RedisClient.db.FLUSHALL()
+    // await RedisClient.db.FLUSHALL()
 
     return result
   }

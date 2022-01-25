@@ -25,7 +25,6 @@ class AuthService {
   public async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       let user = await User.findOne({ email }).populate('role')
-      console.log(user)
       if (!user)
         throw new DomainError(
           '',
