@@ -187,6 +187,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
       orders = orders.reverse()
       result.push({ tableId: table_id, orders })
     }
+    console.log(result)
     return result
   }
 
@@ -197,7 +198,9 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async update_order(restaurant_id: string, table_id: string, order_index: any, order: any) {
     console.log(order_index)
-    this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', order_index, JSON.stringify(order))
+    console.log('IN UPDATE')
+    console.log(order)
+    this.hset('VR_' + restaurant_id + '_Table_' + table_id + '_Orders', String(parseInt(order_index) + 1), JSON.stringify(order))
     return 'ok'
   }
 
@@ -206,7 +209,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
     //return 'VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders'
 
     var result = await this.getall('VR_' + String(restaurant_id) + '_Table_' + String(table_id) + '_Orders')
-
+    console.log(result)
     const orders = []
     for (let i = 1; i < Object.keys(result).length + 1; i++) {
       orders.push(JSON.parse(result[String(i)]))
