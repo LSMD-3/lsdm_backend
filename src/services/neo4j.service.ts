@@ -142,6 +142,35 @@ class Neo4jService {
       return followIds.properties.id
     })
   }
+
+  public async suggestOtherFriends(userId: string): Promise<any> {
+    //Method that suggest other friends to follow based on friends you are following
+    const session = Neo4jClient.driver.session()
+    const results = await session.run(`MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
+    (otherFriends1)-[:FOLLOWS]->(user3:User)-[:FOLLOWS]->(otherFriends2:User) RETURN otherFriends2.id AS SuggestedFriends, count(*)AS Strength
+    ORDER BY Strength DESC`)
+    return results.records.map((r)=>{ return r.get('SuggestedFriends')})
+  }
+
+  public async suggestOtherRecipes(userId: string): Promise<any> {
+    //Method to suggest other recipes liked by other friends you might follow or know
+    const session = Neo4jClient.driver.session()
+    const results  = await session.run(`MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
+    (otherFriends1)-[:FOLLOWS]->(user3:User)-[:LIKES]->(recipe:Recipe)
+    RETURN recipe.id AS SuggestedRecipes, count(*)AS Strength
+    ORDER BY Strength DESC`)
+    return results.records.map((r)=>{ return r.get('SuggestedRecipes')})
+  }
+
+  public async suggestOtherRestaurants(userId: string): Promise<any> {
+    //Method to suggest other Restaurants liked by other friends you might potentially follow
+    const session = Neo4jClient.driver.session()
+    const results = await session.run(`MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
+    (otherFriends1)-[:FOLLOWS]->(user3:User)-[:LIKES]->(restaurant:Restaurant)
+    RETURN restaurant.id AS SuggestedRestaurants, count(*)AS Strength
+    ORDER BY Strength DESC`)
+    return results.records.map((r)=>{ return r.get('SuggestedRestaurants')})
+  }
 }
 
 export default new Neo4jService()
