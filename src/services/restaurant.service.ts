@@ -60,6 +60,17 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createTable(restaurant_id: string, table_id: string, customers: string, status: string) {
+    var restaurant_exists = await RedisClient.db.HEXISTS('Active_Restaurants', restaurant_id)
+    if (!restaurant_exists) {
+      await this.hset('Active_Restaurants', restaurant_id, JSON.stringify([table_id]))
+    } else {
+      let active_table = await this.hget('Active_Restaurants', restaurant_id)
+      let table_array: string[] = JSON.parse(active_table)
+      if (!table_array.includes(table_id)) table_array.push(table_id)
+
+      await this.hset('Active_Restaurants', restaurant_id, JSON.stringify(table_array))
+    }
+
     await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_customers', customers)
     await this.hsetnx('VR_' + restaurant_id, 'Table_' + table_id + '_status', status)
     return 'VR_' + restaurant_id + '_Table_' + table_id

@@ -37,4 +37,4 @@ User.methods.validatePassword = async function validatePassword(password: string
   return bcrypt.compare(password, this.password)
 }
 
-export default mongoConnections['main'].model<IUser>('User', User)
+export default mongoConnections['main'].model<IUser>('users', User)
