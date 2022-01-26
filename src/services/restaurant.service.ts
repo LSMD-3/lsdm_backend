@@ -322,6 +322,86 @@ class RestaurantService extends AbstractService<IRestaurant> {
   public async deleteMenu(): Promise<void> {
     //todo
   }
+
+  public async getCheapestRestaurants(comune?: string) {
+    const pipeline = [
+      {
+        $match: {
+          menu: {
+            $ne: null,
+          },
+        },
+      },
+      {
+        $project: {
+          recipes: '$menu.recipes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$recipes',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          totalPrice: {
+            $sum: '$recipes.price',
+          },
+          totalCount: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $project: {
+          avgPrice: {
+            $divide: ['$totalPrice', '$totalCount'],
+          },
+        },
+      },
+      {
+        $sort: {
+          avgPrice: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'restaurants',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'restaurant',
+        },
+      },
+      {
+        $project: {
+          avgPrice: 1,
+          restaurant: {
+            $first: '$restaurant',
+          },
+        },
+      },
+      {
+        $project: {
+          avgPrice: 1,
+          nome: '$restaurant.nome',
+          comune: '$restaurant.comune',
+        },
+      },
+    ]
+
+    if (comune && comune.length > 0) {
+      console.log(comune)
+      pipeline.push({
+        $match: {
+          comune: comune,
+        },
+      })
+    }
+
+    const result = await Restaurant.aggregate(pipeline)
+    return result
+  }
 }
 
 export default new RestaurantService()

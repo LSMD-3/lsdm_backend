@@ -18,5 +18,25 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/recipeRanking', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reduced = Boolean(req.query.reduced)
+      const response = await TableSessionService.getRecipesRanking(reduced)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/userRanking', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reduced = Boolean(req.query.reduced)
+      const response = await TableSessionService.getUserRanking(reduced)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, TableSessionService)
 }

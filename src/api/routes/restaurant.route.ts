@@ -326,5 +326,15 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/restaurantRanking', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const comune = req.query.comune
+      const response = await RestaurantService.getCheapestRestaurants(comune)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, RestaurantService)
 }

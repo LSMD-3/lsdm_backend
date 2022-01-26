@@ -51,7 +51,6 @@ class TableSessionService extends AbstractService<ITableSession> {
         ordersToSave = ordersToSave.concat(this.extractOrdersfromRawValues(order, user, index))
       })
       const partecipants = [...new Set(order_list_users)]
-      console.log(partecipants)
       const session = new TableSession({ restaurantId: restaurant, tableId: table, partecipants, orders: ordersToSave })
       response.push({ session: `VR_${restaurant}_Table_${table}_Orders_History_${element}`, orders: ordersToSave.length })
       await session.save()
@@ -82,6 +81,105 @@ class TableSessionService extends AbstractService<ITableSession> {
 
     // await RedisClient.db.FLUSHALL()
 
+    return result
+  }
+
+  public async getRecipesRanking(reduced: boolean) {
+    const pipeline = [
+      {
+        $match: {
+          orders: {
+            $ne: [],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          'orders.recipeId': 1,
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $project: {
+          recipeId: '$orders.recipeId',
+        },
+      },
+      {
+        $group: {
+          _id: '$recipeId',
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          total: -1,
+        },
+      },
+    ]
+    if (reduced)
+      pipeline.push({
+        $project: {
+          total: 1,
+          _id: 0,
+        },
+      })
+
+    const result = await TableSession.aggregate(pipeline)
+    return result
+  }
+
+  public async getUserRanking(reduced: boolean) {
+    const pipeline = [
+      {
+        $match: {
+          orders: {
+            $ne: [],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          'orders.clientId': 1,
+          'orders.recipeId': 1,
+          'orders.quantity': 1,
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $group: {
+          _id: '$orders.clientId',
+          total: {
+            $sum: '$orders.quantity',
+          },
+        },
+      },
+      {
+        $sort: {
+          total: -1,
+        },
+      },
+    ]
+    if (reduced)
+      pipeline.push({
+        $project: {
+          total: 1,
+          _id: 0,
+        },
+      })
+
+    const result = await TableSession.aggregate(pipeline)
     return result
   }
 }
