@@ -391,7 +391,6 @@ class RestaurantService extends AbstractService<IRestaurant> {
     ]
 
     if (comune && comune.length > 0) {
-      console.log(comune)
       pipeline.push({
         $match: {
           comune: comune,
