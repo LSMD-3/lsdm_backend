@@ -239,4 +239,34 @@ export default (app: Router) => {
       handleError(res, error)
     }
   })
+
+  //Get Friends Suggestion
+  route.get('/suggestfriends/:user', async (req:Request, res:Response, next:NextFunction)=>{
+    try {
+      const result = await Neo4jService.suggestOtherFriends(req.params.user)
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
+    }
+  })
+
+  //Get Recipes Suggestion
+  route.get('/suggestrecipes/:user', async (req:Request, res:Response, next: NextFunction)=>{
+    try {
+      const result = await Neo4jService.suggestOtherRecipes(req.params.user)
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
+    }
+  })
+
+  //Get Restaurant Suggestion
+  route.get('/suggestrestaurants/:user', async (req:Request, res:Response, next: NextFunction)=>{
+    try {
+      const result = await Neo4jService.suggestOtherRestaurants(req.params.user)
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
+    }
+  })
 }
