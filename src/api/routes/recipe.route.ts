@@ -43,5 +43,15 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/byIngredient/:ingredient', async (req: Request, res: Response, next: NextFunction) => {
+    const ingredient = req.params.ingredient ?? 'salmone'
+    try {
+      const recipes = await RecipeService.getRecipesWithIngredients(ingredient)
+      res.json(recipes)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, RecipeService)
 }
