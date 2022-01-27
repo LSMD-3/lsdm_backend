@@ -125,9 +125,14 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async redis_clone(map: any, key: any) {
-    const redisLuaScript = fs.readFileSync(`${__dirname}/copy_key.lua`)
-    const result1 = await redis.eval(redisLuaScript, 2, map, key)
-    return result1
+    try {
+      const redisLuaScript = fs.readFileSync(`${__dirname}/copy_key.lua`)
+      const result1 = await redis.eval(redisLuaScript, 2, map, key)
+      return result1
+    } catch (error) {
+      console.log('redis_clone failed')
+      console.log(map, key)
+    }
   }
 
   public async clone(source: string, destination: string) {

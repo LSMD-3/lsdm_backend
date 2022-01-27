@@ -65,7 +65,7 @@ class TableSessionService extends AbstractService<ITableSession> {
   public async backupRestaurant(restaurant: string) {
     const tables = await this.getRestaurantTables(restaurant)
     if (!tables) return { restauranId: restaurant, total_sessions: 0 }
-
+    console.log('Backing up restaurant: ' + restaurant)
     const promises = tables.map((t) => this.getAndSaveTableSession(restaurant, t))
     const result = await Promise.all(promises)
 
@@ -79,7 +79,7 @@ class TableSessionService extends AbstractService<ITableSession> {
 
     const result = await Promise.all(promises)
 
-    // await RedisClient.db.FLUSHALL()
+    await RedisClient.db.FLUSHALL()
 
     return result
   }
