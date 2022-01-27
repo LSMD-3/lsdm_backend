@@ -1,3 +1,4 @@
+import { Recipe, Restaurant, User } from '@/models'
 import { Neo4jService } from '@/services'
 import { Request, Router, Response, NextFunction } from 'express'
 import { body } from 'express-validator'
@@ -241,30 +242,36 @@ export default (app: Router) => {
   })
 
   //Get Friends Suggestion
-  route.get('/suggestfriends/:user', async (req:Request, res:Response, next:NextFunction)=>{
+  route.get('/suggestfriends/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await Neo4jService.suggestOtherFriends(req.params.user)
-      res.json(result)
+      const users = await User.find({ _id: { $in: result } }, 'name surname')
+
+      res.json(users)
     } catch (error) {
       handleError(res, error)
     }
   })
 
   //Get Recipes Suggestion
-  route.get('/suggestrecipes/:user', async (req:Request, res:Response, next: NextFunction)=>{
+  route.get('/suggestrecipes/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await Neo4jService.suggestOtherRecipes(req.params.user)
-      res.json(result)
+      const recipes = await Recipe.find({ _id: { $in: result } }, 'recipe_name')
+
+      res.json(recipes)
     } catch (error) {
       handleError(res, error)
     }
   })
 
   //Get Restaurant Suggestion
-  route.get('/suggestrestaurants/:user', async (req:Request, res:Response, next: NextFunction)=>{
+  route.get('/suggestrestaurants/:user', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await Neo4jService.suggestOtherRestaurants(req.params.user)
-      res.json(result)
+      const restaurants = await Restaurant.find({ _id: { $in: result } }, 'nome')
+
+      res.json(restaurants)
     } catch (error) {
       handleError(res, error)
     }
