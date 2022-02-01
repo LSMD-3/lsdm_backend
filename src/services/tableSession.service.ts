@@ -53,8 +53,12 @@ class TableSessionService extends AbstractService<ITableSession> {
       const partecipants = [...new Set(order_list_users)]
       const session = new TableSession({ restaurantId: restaurant, tableId: table, partecipants, orders: ordersToSave })
       response.push({ session: `VR_${restaurant}_Table_${table}_Orders_History_${element}`, orders: ordersToSave.length })
+      await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_${element}`)
+      await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_to_users_${element}`)
       await session.save()
     })
+    await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History`)
+    await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_to_users`)
 
     return response
   }
@@ -78,8 +82,6 @@ class TableSessionService extends AbstractService<ITableSession> {
     const promises = keys.map((k) => this.backupRestaurant(k))
 
     const result = await Promise.all(promises)
-
-    await RedisClient.db.FLUSHALL()
 
     return result
   }

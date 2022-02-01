@@ -3,6 +3,7 @@ import config from '@/config'
 import { DomainError } from '@/exceptions'
 import express, { NextFunction, Response, Request } from 'express'
 import routes from '@/api'
+import { gusto, helloWorld } from '@/py-modules'
 
 export default ({ app }: { app: express.Application }) => {
   app.get('/status', (req, res) => {

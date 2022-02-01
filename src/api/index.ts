@@ -1,11 +1,11 @@
+import { Router } from 'express'
 import role from './routes/role.route'
 import user from './routes/user.route'
 import auth from './routes/auth.route'
 import restaurant from './routes/restaurant.route'
 import recipe from './routes/recipe.route'
-import neo4j from './routes/neo4j.route'
 import tableSession from './routes/tableSession.route'
-import { Router } from 'express'
+import { attachRelationServiceRoutes } from '@/relations-service'
 
 export default () => {
   const app = Router()
@@ -14,7 +14,7 @@ export default () => {
   auth(app)
   restaurant(app)
   recipe(app)
-  neo4j(app)
+  attachRelationServiceRoutes(app)
   tableSession(app)
 
   return app
