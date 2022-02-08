@@ -1,0 +1,36 @@
+{
+  "restaurant": {
+    "_id": "12345678",
+    "name": "Il gatto che ride",
+    "comune": "Pistoia",
+    "tipologia": "Ristorante"
+  },
+  "tables": [
+    {
+      "tableId": "12",
+      "session": [
+        {
+          "_id": "12345678",
+          "creationDate": "DATE",
+          "orderHistory": [
+            {
+              "customer": {
+                "_id": "12345678",
+                "name": "Marco"
+              },
+              "orders": [
+                {
+                  "_id": "12345678",
+                  "recipe_name": "Risotto al caviale",
+                  "price": 12,
+                  "ingredient": ["risotto", "caviale"],
+                  "quantity": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

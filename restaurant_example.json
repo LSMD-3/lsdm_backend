@@ -1,0 +1,64 @@
+{
+  "menus": [
+    {
+      "_id": "123456789",
+      "price": 19,
+      "ayce": true,
+      "name": "Menu AYCE",
+      "recipes": [
+        {
+          "_id": "12345678",
+          "recipe_name": "Palline di pandoro e mascarpone",
+          "image_url": "https://www.misya.info/wp-content/uploads/2021/11/palline-di-pandoro-e-mascarpone.jpg",
+          "price": 5.9,
+          "ingredient": ["pandoro", "mascarpone"]
+        },
+        {
+          "_id": "12345678",
+          "recipe_name": "Risotto al caviale",
+          "image_url": "https://www.misya.info/wp-content/uploads/2021/11/risotto-al-caviale.jpg",
+          "price": 12,
+          "ingredient": ["risotto", "caviale"]
+        }
+      ]
+    },
+    {
+      "_id": "123456789",
+      "ayce": false,
+      "name": "Menu a la carte",
+      "recipes": [
+        {
+          "_id": "12345678",
+          "recipe_name": "Palline di pandoro e mascarpone",
+          "image_url": "https://www.misya.info/wp-content/uploads/2021/11/palline-di-pandoro-e-mascarpone.jpg",
+          "price": 5.9,
+          "ingredient": ["pandoro", "mascarpone"]
+        },
+        {
+          "_id": "12345678",
+          "recipe_name": "Risotto al caviale",
+          "image_url": "https://www.misya.info/wp-content/uploads/2021/11/risotto-al-caviale.jpg",
+          "price": 12,
+          "ingredient": ["risotto", "caviale"]
+        }
+      ]
+    }
+  ],
+  "staff": {
+    "admins": [
+      {
+        "_id": "12345678",
+        "name": "Mario",
+        "surname": "Rossi"
+      }
+    ],
+    "chefs": [
+      {
+        "_id": "12345678",
+        "name": "Tony",
+        "surname": "Bianchi"
+      }
+    ],
+    "waiters": []
+  }
+}
