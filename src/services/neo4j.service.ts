@@ -1,9 +1,10 @@
 import { Neo4jRecipe, Neo4jRestaurant, Neo4jUser } from '@/interfaces'
+import { Neo4jClient } from '@/relations-service/utils/Neo4jClient'
 
 class Neo4jService {
   public async addUser(userId: string): Promise<any> {
     // Method to add user
-    const session = Neo4jClient.driver.session()
+    const session = Neo4jClient.session()
     await session.run(`CREATE (u:User {id:"${userId}"}) RETURN u`)
     session.close()
     return `UserID ${userId} added Successfully`

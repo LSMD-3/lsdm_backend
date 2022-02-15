@@ -21,7 +21,7 @@ export interface Neo4jConnector {
 }
 
 export const Neo4jClient = new Connector({
-  path: 'neo4j+s://e5721e84.databases.neo4j.io',
+  path: 'neo4j+s://8d11bd1e.databases.neo4j.io',
   username: 'neo4j',
-  password: 'IKfPEcvPBsOkOrYC4Gi71yAwo13-j1CBWJ9VUsV4DT0',
+  password: 'w6bdQ1OUMbmMe5ieVYIl3cz4Ve8JjgQuEflsAlun-y4',
 })
