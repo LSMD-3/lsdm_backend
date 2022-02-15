@@ -1,16 +1,14 @@
 import { Document } from 'mongoose'
 import { IRecipe, IUser } from '..'
-export interface MenuRecipes {
-  recipe: IRecipe
+export interface MenuRecipes extends IRecipe {
   price: number
   max_quantity?: number
 }
 
 export interface IMenu {
   name: string
-  description?: string
   recipes: MenuRecipes[]
-  ayce_available: boolean
+  ayce: boolean
 }
 
 export interface IRestaurant extends Document {
@@ -27,9 +25,12 @@ export interface IRestaurant extends Document {
   longitudine: string
   provincia: string
   cap: string
-  chefs: string[]
-  waiters: string[]
-  admins: string[]
+  staff: {
+    chefs: IUser[]
+    waiters: IUser[]
+    admins: IUser[]
+  }
+  menus: IMenu[]
   menu: IMenu
 }
 

@@ -17,10 +17,21 @@ var Restaurant = new Schema(
     longitudine: { type: String },
     provincia: { type: String },
     cap: { type: String },
-    chefs: [{ type: Schema.Types.ObjectId, ref: 'users' }],
-    waiters: [{ type: Schema.Types.ObjectId, ref: 'users' }],
-    admins: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+
     tables_number: { type: Number, default: 10 },
+    staff: {
+      _id: false,
+      chefs: [{ type: JSON }],
+      waiters: [{ type: JSON }],
+      admins: [{ type: JSON }],
+    },
+    menus: [
+      {
+        ayce: { type: Boolean },
+        name: { type: String },
+        recipes: [{ type: JSON }],
+      },
+    ],
     menu: {
       _id: false,
       ayce_available: { type: Boolean },

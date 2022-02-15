@@ -209,23 +209,6 @@ export default (app: Router) => {
     }
   )
 
-  route.post(
-    '/staff',
-    body('restaurantId').isString(),
-    body('userId').isString(),
-    body('userType').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { restaurantId, userId, userType } = req.body
-        const result = await RestaurantService.addStaffToRestaurant(restaurantId, userId, userType)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
-    }
-  )
-
   route.get('/staff/:userId/:userType', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await RestaurantService.findRestaurantOfStaff(req.params.userId, req.params.userType as UserType)

@@ -225,34 +225,14 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   //public asyc setMultiple(map:string,keys:string[])
 
-  public async addStaffToRestaurant(restaurantId: string, userId: string, userType: UserType): Promise<boolean> {
-    const restaurant = await Restaurant.findById(restaurantId, 'menu')
-    if (!restaurant) return false
-
-    if (userType === 'chef') {
-      if (restaurant.chefs) restaurant.chefs.push(userId)
-      else restaurant.chefs = [userId]
-    }
-    if (userType === 'waiter') {
-      if (restaurant.waiters) restaurant.waiters.push(userId)
-      else restaurant.waiters = [userId]
-    }
-    if (userType === 'admin') {
-      if (restaurant.admins) restaurant.admins.push(userId)
-      else restaurant.admins = [userId]
-    }
-    await restaurant.save()
-    return true
-  }
-
-  public async findRestaurantOfStaff(userId: string, userType: UserType): Promise<IRestaurant | null> {
+  public async findRestaurantOfStaff(userId: string, userType: UserType): Promise<IRestaurant[] | null> {
     let query = undefined
-    if (userType === 'chef') query = { chefs: userId }
-    if (userType === 'waiter') query = { waiters: userId }
-    if (userType === 'admin') query = { admins: userId }
+    if (userType === 'chef') query = { 'staff.chefs._id': userId }
+    if (userType === 'waiter') query = { 'staff.waiters._id': userId }
+    if (userType === 'admin') query = { 'staff.admins._id': userId }
 
     if (!query) return null
-    const restaurant = await Restaurant.findOne(query)
+    const restaurant = await Restaurant.findOne(query, 'nome')
     return restaurant
   }
 
@@ -285,7 +265,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createMenu(restaurantId: string, preferences: MenuCreationPreferences): Promise<IMenu | undefined> {
-    const restaurant = await Restaurant.findById(restaurantId, 'nome')
+    const restaurant = await Restaurant.findById(restaurantId, 'nome menus')
     if (!restaurant) return undefined
 
     let n = preferences.totalRecipes
@@ -304,21 +284,26 @@ class RestaurantService extends AbstractService<IRestaurant> {
     result.forEach((rs) => {
       rs.forEach((recipe: IRecipe) => {
         recipes.push({
+          _id: recipe._id,
+          category: recipe.category,
+          image_url: recipe.image_url,
+          ingredients: recipe.ingredients,
+          recipe_link: recipe.recipe_link,
+          recipe_name: recipe.recipe_name,
           price: this.getRandomPrice(preferences.startPrice, preferences.endPrice),
-          recipe: recipe._id,
         })
       })
     })
 
     const menu: IMenu = {
-      ayce_available: true,
+      ayce: true,
       name: restaurant.nome + ' menu',
       recipes: recipes,
     }
 
-    restaurant.menu = menu
+    restaurant.menus.push(menu)
     await restaurant.save()
-    return await this.getMenu(restaurantId)
+    return menu
   }
 
   public async updateMenu(): Promise<IMenu> {

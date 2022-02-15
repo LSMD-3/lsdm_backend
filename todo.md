@@ -1,7 +1,3 @@
-# Recipe Collection: [mike]
-
-- replace ingredients list with just name of the ingredient -> ingredients[]
-
 # Restaurant Collection: [marco]
 
 - change the model following the example
