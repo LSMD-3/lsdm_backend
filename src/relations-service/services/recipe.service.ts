@@ -7,7 +7,7 @@ export interface RecipeNodeProps {
 
 class RecipeService extends BaseNeo4jService<RecipeNodeProps> {
   constructor() {
-    super('Recipe', [{ to: 'Ingredient', relations: ['HAS'] }])
+    super('Recipe', [])
   }
 }
 

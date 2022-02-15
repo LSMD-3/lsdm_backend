@@ -66,10 +66,11 @@ export default (app: Router) => {
     '/join_tablenew',
     body('restaurant').exists(),
     body('table_id').exists(),
+    body('customer').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.join_tablenew(req.body.restaurant, req.body.table_id)
+        const response = await RestaurantService.join_tablenew(req.body.restaurant, req.body.table_id, req.body.customer)
         res.json(response)
       } catch (e) {
         handleError(res, e)
@@ -154,23 +155,23 @@ export default (app: Router) => {
       }
     }
   )
-
   route.post(
     '/order/create_ordernew',
     body('restaurant').exists(),
     body('table_id').exists(),
-    body('user').exists(),
+    body('customer').exists(),
     body('orders').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.createOrdernew(req.body.restaurant, req.body.table_id, req.body.user, req.body.orders)
+        const response = await RestaurantService.createOrdernew(req.body.restaurant, req.body.table_id, req.body.customer, req.body.orders)
         res.json(response)
       } catch (e) {
         handleError(res, e)
       }
     }
   )
+
   route.post(
     '/order/create_order',
     body('restaurant_id').exists().isString(),
@@ -211,12 +212,46 @@ export default (app: Router) => {
   )
   route.post(
     '/get_orders_for_chef',
-    body('restaurant_id').exists().isString(),
-
+    body('restaurant').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.get_orders_for_chef(req.body.restaurant_id)
+        const response = await RestaurantService.get_orders_for_chef(req.body.restaurant)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+  route.post(
+    '/update_order_new',
+    body('restaurant').exists(),
+    body('table_id').exists().isString(),
+    body('order_index').exists(),
+    body('orders').exists(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.update_ordernew(
+          req.body.restaurant,
+          req.body.table_id,
+          req.body.order_index,
+          req.body.orders
+        )
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.post(
+    '/get_orders_for_chef_new',
+    body('restaurant').exists(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.get_orders_for_chefnew(req.body.restaurant)
         res.json(response)
       } catch (e) {
         handleError(res, e)
@@ -233,6 +268,22 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const response = await RestaurantService.get_orders_for_user(req.body.restaurant_id, req.body.table_id, req.body.user_id)
+        res.json(response)
+      } catch (e) {
+        handleError(res, e)
+      }
+    }
+  )
+
+  route.post(
+    '/table/get_orders_for_user_new',
+    body('restaurant').exists(),
+    body('table_id').exists().isString(),
+    body('customer').exists(),
+    validateInput,
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const response = await RestaurantService.get_orders_for_user_new(req.body.restaurant, req.body.table_id, req.body.customer)
         res.json(response)
       } catch (e) {
         handleError(res, e)

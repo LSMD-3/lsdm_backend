@@ -26,38 +26,6 @@ export default (app: Router) => {
     }
   )
 
-  route.post(
-    '/addIngredient',
-    body('recipeId').isString(),
-    body('ingredientId').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { recipeId, ingredientId } = req.body
-        const result = await NeoRecipeService.createRelation(recipeId, 'HAS', ingredientId, 'Ingredient')
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
-    }
-  )
-
-  route.delete(
-    '/addIngredient',
-    body('recipeId').isString(),
-    body('ingredientId').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { recipeId, ingredientId } = req.body
-        const result = await NeoRecipeService.deleteRelation(recipeId, 'HAS', ingredientId, 'Ingredient')
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
-    }
-  )
-
   //Delete All Nodes
   route.delete('/all', validateInput, async (req: Request, res: Response, next: NextFunction) => {
     try {

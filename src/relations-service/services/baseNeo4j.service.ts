@@ -1,7 +1,7 @@
 import { Neo4jClient } from '../utils/Neo4jClient'
 import stringifyAttributes from '../utils/parsers'
 
-export type Neo4jEntity = 'User' | 'Restaurant' | 'Recipe' | 'Ingredient'
+export type Neo4jEntity = 'User' | 'Restaurant' | 'Recipe'
 export type Neo4jRelation = 'LIKES' | 'FOLLOWS' | 'HAS' | 'EATS'
 
 interface BaseNode {

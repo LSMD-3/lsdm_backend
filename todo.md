@@ -1,32 +1,27 @@
-# Restaurant Collection: [marco]
+# Marco
 
-- change the model following the example
-- set ayce flag, price of menu
-- add new recipe from scratch will push it also il recipes collection
-- CRUD of a recipe inside a Menu (update everything about the recipe-> price, name, imageUrl)
-- Remove from frontend auto assignment for waiter and chef
-- Admin to add new restaurant -> CRUD
-- Add/Remove of restaurant staff
+- edit menu informations (set ayce flag, price of menu)
+- edit recipe in menu
+- shortcut to create and add a new recipe
 - when user click on the recipe, show poupop with details of it
+- Filter for ingredients and search recipe in menu
+
+# Giacomo
+
+# Michael
+
+- Ricette con più like e meno like
+
+# Use Cases
 
 # Redis [jack]
 
-- Store redudancy informations in redis
 - Talk about concistency used approach
 
 # Neo4j [mike]
 
-- create random relationships between nodes [Generator]
-- generateRandomUserFollows, generateRandomRestaurantLike, generateRandomRecipeLike
-
-# Documentation [jack]
-
-- Review and Refactor
-
-# Aggregations
-
-- Define smart aggregations [all]
-- need to be displayed in the admin FE
+- [da_integrare] create random relationships between nodes [Generator]
+- [da_integrare] generateRandomUserFollows, generateRandomRestaurantLike, generateRandomRecipeLike
 
 # Neo4j clarification
 
@@ -43,3 +38,16 @@
 - When we add a new recipe to a menu -> store it in neo4j
 - When we update a new recipe -> update in neo4j
 - Detete a recipe -> delete recipe and detach all relations
+
+- dobbiamo anche mettere la possibilità di scegliere il menu
+- visualizzazione del singolo ristorante con i suoi menu
+- browsing complesso ristoranti -> visualizzazione tabella
+- dentro il ristorante visualizzare ricette di tendenza
+- sul profilo utente -> suggerire 5 ristoranti più piaciuti dai followee
+
+# Statistics
+
+- piatto più ordinato in base ad una posizione
+- il piatto che ha più like
+- ricette più ordinate nei ristoranti più visitati
+- ranking categorie

@@ -33,48 +33,6 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
     })
   }
 
-  async getFavouritesIngredients(userId: string) {
-    const getEaten = async () => {
-      const session = Neo4jClient.session()
-      const results = await session.run(`match (u:User {_id:"${userId}"})-[:EATS]->(r:Recipe)-[:HAS]->(eaten:Ingredient) return eaten`)
-      session.close()
-      return results.records.map((f) => {
-        const followIds = f.get('eaten')
-        return followIds.properties
-      }) as { name: string; _id: string }[]
-    }
-    const getLiked = async () => {
-      const session = Neo4jClient.session()
-      const results = await session.run(`match (u:User {_id:"${userId}"})-[:LIKES]->(r:Recipe)-[:HAS]->(liked:Ingredient) return liked`)
-      session.close()
-      return results.records.map((f) => {
-        const followIds = f.get('liked')
-        return followIds.properties
-      })
-    }
-    const [eaten, liked] = await Promise.all([getEaten(), getLiked()])
-
-    // Join eaten and liked
-    let dict: { [ingredientId: string]: number } = {}
-    eaten.forEach((i) => {
-      if (dict.hasOwnProperty(i._id)) {
-        dict[i._id]++
-      } else {
-        dict[i._id] = 1
-      }
-    })
-
-    liked.forEach((i) => {
-      if (dict.hasOwnProperty(i._id)) {
-        dict[i._id] += 5
-      } else {
-        dict[i._id] = 5
-      }
-    })
-
-    return dict
-  }
-
   async getTotalFollowers(userId: string): Promise<any> {
     //Method to get count of total Users Followed
     const session = Neo4jClient.session()

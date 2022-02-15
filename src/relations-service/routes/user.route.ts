@@ -44,8 +44,8 @@ export default (app: Router) => {
   )
 
   // User Unfollows User
-  route.delete(
-    '/followUser',
+  route.post(
+    '/deletefollowUser',
     body('follower').isString(),
     body('followee').isString(),
     validateInput,
@@ -78,8 +78,8 @@ export default (app: Router) => {
   )
 
   //User Unikes Restaurant
-  route.delete(
-    '/likeRestaurant',
+  route.post(
+    '/deletelikeRestaurant',
     body('userId').isString(),
     body('restaurant').isString(),
     validateInput,
@@ -112,8 +112,8 @@ export default (app: Router) => {
   )
 
   //User Unlikes Recipe
-  route.delete(
-    '/likeRecipe',
+  route.post(
+    '/deletelikeRecipe',
     body('userId').isString(),
     body('recipeId').isString(),
     validateInput,
@@ -146,8 +146,8 @@ export default (app: Router) => {
   )
 
   //User Unlikes Recipe
-  route.delete(
-    '/eatRecipe',
+  route.post(
+    '/deleteeatRecipe',
     body('userId').isString(),
     body('recipeId').isString(),
     validateInput,
@@ -161,15 +161,6 @@ export default (app: Router) => {
       }
     }
   )
-  route.get('/favouriteIngredients/:userId', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { userId } = req.params
-      const result = await NeoUserService.getFavouritesIngredients(userId)
-      res.json(result)
-    } catch (e) {
-      handleError(res, e)
-    }
-  })
 
   // Get All Followers
   route.get('/followers/:userId', async (req: Request, res: Response, next: NextFunction) => {
