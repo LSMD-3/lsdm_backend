@@ -221,9 +221,9 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async update_ordernew(restaurant: any, table_id: string, order_index: any, order: any) {
     let old_order = await this.hget(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(parseInt(order_index) + 1))
-    let user = JSON.parse(old_order)
-    console.log({ old_order })
-    console.log(order_index)
+    const parsed_order = JSON.parse(old_order)
+    old_order = parsed_order[0]
+    let user = parsed_order[1]
 
     this.hset(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(parseInt(order_index) + 1), JSON.stringify([order, user]))
     return 'ok'

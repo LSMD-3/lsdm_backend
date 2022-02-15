@@ -142,13 +142,13 @@ export default (app: Router) => {
 
   route.post(
     '/table/check_out',
-    body('restaurant_id').exists(),
+    body('restaurant').exists(),
     body('table_id').exists(),
 
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.checkout_Table(req.body.restaurant_id, req.body.table_id)
+        const response = await RestaurantService.checkout_Tablenew(req.body.restaurant, req.body.table_id)
         res.json(response)
       } catch (e) {
         handleError(res, e)
