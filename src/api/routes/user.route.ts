@@ -39,17 +39,6 @@ export default (app: Router) => {
     }
   )
 
-  route.get('/followsemails/:userId', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      // console.log(req.params.userId);
-      const followsIds = await Neo4jService.getTotalFollowsID(req.params.userId)
-      const emails = await UserService.getEmailsOfFollows(followsIds)
-      res.json(emails)
-    } catch (e) {
-      handleError(res, e)
-    }
-  })
-
   route.get('/normalUser/:limit', async (req: Request, res: Response, next: NextFunction) => {
     try {
       // console.log(req.params.userId);

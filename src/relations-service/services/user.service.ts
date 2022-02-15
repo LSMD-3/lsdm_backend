@@ -4,6 +4,8 @@ import { BaseNeo4jService } from './baseNeo4j.service'
 export interface UserNodeProps {
   _id: string
   email: string
+  name: string
+  surname: string
 }
 
 class UserService extends BaseNeo4jService<UserNodeProps> {

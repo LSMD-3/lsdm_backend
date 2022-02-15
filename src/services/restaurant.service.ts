@@ -4,6 +4,8 @@ import TuplesObject from '@/loaders/redis'
 import { Restaurant, Recipe } from '@/models'
 import { AndArray } from '@/utils'
 import { AbstractService, ProjectType } from './abstract.service'
+import restaurantService from '@/relations-service/services/restaurant.service'
+
 var fs = require('fs')
 const Redis = require('ioredis')
 const redis = new Redis(6379, '127.0.0.1')
@@ -596,6 +598,32 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
     const result = await Restaurant.aggregate(pipeline)
     return result
+  }
+
+  public async add(data: IRestaurant): Promise<IRestaurant> {
+    const restaurant = await super.add(data)
+    try {
+      await restaurantService.createNode({ _id: restaurant._id, name: restaurant.nome, comune: restaurant.comune })
+    } catch (error) {
+      await super.delete(data._id)
+      throw new Error('Failed to add restaurant in neo4j')
+    }
+    return restaurant
+  }
+
+  public async update(data: IRestaurant): Promise<IRestaurant> {
+    const restaurant = await super.update(data)
+    // TODO update neo
+    return restaurant
+  }
+
+  public async delete(restaurantId: string) {
+    try {
+      await restaurantService.deleteNode(restaurantId)
+      await super.delete(restaurantId)
+    } catch (error) {
+      throw new Error('Failed to delete restaurant in neo4j')
+    }
   }
 }
 
