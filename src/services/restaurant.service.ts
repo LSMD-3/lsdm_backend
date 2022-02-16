@@ -83,14 +83,22 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async add_table_partecipants(restaurant: any, table_id: string, customer: any) {
     let table_customers_exist = await this.exist(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
+    console.log(table_customers_exist)
     if (!table_customers_exist) {
       await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify([customer]))
     } else {
       let allcutomers = await this.hget(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1))
       allcutomers = JSON.parse(allcutomers)
-      if (!allcutomers.includes(customer)) {
+      console.log(allcutomers)
+      let flag = 1
+      for (let i = 0; i < allcutomers.length; i++) {
+        if (allcutomers[i]._id == customer._id) {
+          flag = 0
+        }
+      }
+      if (flag) {
         allcutomers.push(customer)
-        await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify([customer]))
+        await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify(allcutomers))
       }
     }
     return 'ok'
@@ -100,6 +108,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
     let restaurant_exist = await this.exists_in('Active_Restaurants', restaurant._id) // Check if restaurant already exists
     console.log(restaurant_exist)
     if (!restaurant_exist) {
+      console.log('E')
       await this.createTablenew(restaurant, table_id)
       await this.add_table_partecipants(restaurant, table_id, customer)
     } else {
