@@ -9,23 +9,6 @@ const route = Router()
 export default (app: Router) => {
   app.use('/neo4j/user', route)
 
-  // Create user node
-  route.post(
-    '/create',
-    body('_id').isString(),
-    body('email').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { _id, email } = req.body
-        const result = await NeoUserService.createNode({ _id, email })
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
-    }
-  )
-
   // User Follows User
   route.post(
     '/followUser',
@@ -103,7 +86,7 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { userId, recipeId } = req.body
-        const result = await NeoUserService.createRelation(userId, 'LIKES', recipeId, 'Recipe')
+        const result = await NeoUserService.createRelation(userId, 'LIKES', recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -120,7 +103,7 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { userId, recipeId } = req.body
-        const result = await NeoUserService.deleteRelation(userId, 'LIKES', recipeId, 'Recipe')
+        const result = await NeoUserService.deleteRelation(userId, 'LIKES', recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -137,7 +120,7 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { userId, recipeId } = req.body
-        const result = await NeoUserService.createRelation(userId, 'EATS', recipeId, 'Recipe')
+        const result = await NeoUserService.createRelation(userId, 'EATS', recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -154,7 +137,7 @@ export default (app: Router) => {
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { userId, recipeId } = req.body
-        const result = await NeoUserService.deleteRelation(userId, 'EATS', recipeId, 'Recipe')
+        const result = await NeoUserService.deleteRelation(userId, 'EATS', recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -185,7 +168,7 @@ export default (app: Router) => {
   // Get All Follows
   route.get('/follows/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await NeoUserService.getTotalFollows(req.params.userId)
+      const result = await NeoUserService.getFollows(req.params.userId)
       res.json(result)
     } catch (e) {
       handleError(res, e)
@@ -199,6 +182,26 @@ export default (app: Router) => {
       res.json(result)
     } catch (e) {
       handleError(res, e)
+    }
+  })
+
+  //Get Friends Suggestion
+  route.get('/likedRestaurant/:userId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await NeoUserService.getLikedRestaurants(req.params.userId)
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
+    }
+  })
+
+  route.get('/likedRecipes/:userId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await NeoUserService.getLikedRecipes(req.params.userId)
+
+      res.json(result)
+    } catch (error) {
+      handleError(res, error)
     }
   })
 

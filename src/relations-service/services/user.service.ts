@@ -71,7 +71,7 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
     const results = await session.run(`MATCH (u:User {id:"${userId}"})-[FOLLOWS]->(u2:User) return u2`)
     return results.records.map((f) => {
       const followIds = f.get('u2')
-      return followIds.properties.id
+      return followIds.properties
     })
   }
 

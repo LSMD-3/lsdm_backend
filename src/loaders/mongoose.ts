@@ -7,7 +7,7 @@ export const mongoConnections: { [name: string]: Connection } = getObject(
       connectTimeoutMS: 5000,
       maxPoolSize: 5,
       w: 1,
-      readPreference: 'nearest',
+      readPreference: 'primary',
     })
 
     conn.once('open', () => {

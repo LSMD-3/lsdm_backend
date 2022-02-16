@@ -1,6 +1,6 @@
 import { User } from '@/models'
-import { Neo4jService, UserService } from '@/services'
-import neo4jService from '@/services/neo4j.service'
+import { UserService } from '@/services'
+
 import { NextFunction, Request, Response, Router } from 'express'
 import { body, param } from 'express-validator'
 import { dateValidator, handleError, HasPermissions, validateInput, verifyAuthToken } from '../middlewares'
@@ -10,17 +10,6 @@ const route = Router()
 
 export default (app: Router) => {
   app.use('/user', route)
-
-  route.get('/followers/:userId', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const rowIds = await neo4jService.getFollowers(req.params.userId)
-      const ids = rowIds.map((r: any) => r.id)
-      const emails = await UserService.getEmailByIds(ids)
-      res.json(emails)
-    } catch (e) {
-      handleError(res, e)
-    }
-  })
 
   route.post(
     '/invalidatesessions/:id',

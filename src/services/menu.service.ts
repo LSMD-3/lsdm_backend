@@ -1,8 +1,5 @@
 import { IMenu, IRecipe, MenuRecipe, MenuRecipes, RECIPE_PERMISSIONS } from '@/interfaces'
 import { Recipe, Restaurant, User } from '@/models'
-import { AbstractService, ProjectType } from './abstract.service'
-import recipeService from '@/relations-service/services/recipe.service'
-import { Neo4jClient } from '@/relations-service/utils/Neo4jClient'
 import restaurantService from '@/relations-service/services/restaurant.service'
 
 // Here we suppose that recipes are already in Neo4j

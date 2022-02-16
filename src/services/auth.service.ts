@@ -3,7 +3,6 @@ import { IUser } from '@/interfaces'
 import { User } from '@/models'
 import config from '@/config'
 import jwt, { VerifyOptions } from 'jsonwebtoken'
-import neo4jService from './neo4j.service'
 import userService from '@/relations-service/services/user.service'
 
 const ISSUER = 'node-express-mongo-boilerplate'
@@ -75,7 +74,7 @@ class AuthService {
       user.logins.push(new Date())
       await user.save()
       try {
-        await userService.createNode({ _id: user._id, email: user.email, name: user.name, surname: user.surname })
+        await userService.createNode({ id: user._id, email: user.email, name: user.name, surname: user.surname })
       } catch (error) {
         await User.findOneAndDelete({ _id: user._id })
         throw new Error('Failed to add user in neo4j')

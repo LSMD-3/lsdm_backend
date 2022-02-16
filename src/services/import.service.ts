@@ -3,7 +3,7 @@ import { Recipe, Restaurant, User } from '@/models'
 import { AbstractService, ProjectType } from './abstract.service'
 import recipeService from '@/relations-service/services/recipe.service'
 import { Neo4jClient } from '@/relations-service/utils/Neo4jClient'
-import stringifyAttributes from '../utils/parsers'
+
 
 class ImportService {
   public async importUsersFromMongoToNeo4j() {
