@@ -435,9 +435,9 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return result
   }
 
-  public async get_table_users(restaurant_id: string, table_id: string) {
-    let users = await this.hget('VR_' + restaurant_id, 'Table_' + table_id + '_customers')
-    if (users) return users.split(',')
+  public async get_table_users(restaurant: any, table_id: string) {
+    let users = await this.hget(`VR_${restaurant._id}_Table_${table_id}_Orders_all_customers`, String(1))
+    if (users) return JSON.parse(users)
     return []
   }
 
