@@ -18,4 +18,22 @@ export default (app: Router) => {
       handleError(res, e)
     }
   })
+
+  route.post('/recipes', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await ImportService.importRecipesFromMongoToNeo4j()
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.post('/restaurants', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await ImportService.importRestaurantsFromMongoToNeo4j()
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
 }
