@@ -1,5 +1,4 @@
 import { Document } from 'mongoose'
-import { IRole } from '..'
 export type UserType = 'user' | 'admin' | 'chef' | 'waiter' | 'super-admin'
 export interface IUser extends Document {
   _id: string
@@ -7,8 +6,6 @@ export interface IUser extends Document {
   surname: string
   email: string
   password: string
-  roleId: string
-  role?: IRole
   userType: UserType
   logins: Date[]
   locked: boolean

@@ -9,7 +9,6 @@ var User = new Schema(
     surname: { type: String },
     email: { type: String, unique: true },
     password: { type: String },
-    roleId: { type: Schema.Types.ObjectId, ref: 'Role' },
     userType: { type: String, enum: ['user', 'admin', 'chef', 'waiter', 'super-admin'], default: 'user' },
     logins: { type: [Date], default: [] },
     locked: { type: Boolean, default: false },
@@ -30,8 +29,6 @@ User.pre('save', async function save(next: any) {
     return next(e)
   }
 })
-
-User.virtual('role', { ref: 'Role', localField: 'roleId', foreignField: '_id', justOne: true })
 
 User.methods.validatePassword = async function validatePassword(password: string) {
   return bcrypt.compare(password, this.password)
