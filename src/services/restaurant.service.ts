@@ -10,13 +10,6 @@ var fs = require('fs')
 const Redis = require('ioredis')
 const redis = new Redis(6379, '127.0.0.1')
 
-interface MenuCreationPreferences {
-  composition: { category: string; percentage: number }[]
-  totalRecipes: number
-  startPrice: number
-  endPrice: number
-}
-
 type Order = {
   _id: string
   qty: number
@@ -483,63 +476,9 @@ class RestaurantService extends AbstractService<IRestaurant> {
     return restaurant.menu as IMenu
   }
 
-  private async fetchRecipe(category: string, limit: number) {
-    const recipes = await Recipe.find({ category: category }).limit(limit)
-    return recipes
-  }
-
-  private getRandomPrice(start: number, end: number) {
-    if (end < start) return 10
-    const diff = end - start
-    const price = Math.trunc(Math.random() * diff) + start
-    return price
-  }
-
   public async findRestaurantByIds(restaurantIds: string[]) {
     const restaurants = await Restaurant.find({ _id: { $in: restaurantIds } }, 'nome')
     return restaurants
-  }
-
-  public async createMenu(restaurantId: string, preferences: MenuCreationPreferences): Promise<IMenu | undefined> {
-    const restaurant = await Restaurant.findById(restaurantId, 'nome menus')
-    if (!restaurant) return undefined
-
-    let n = preferences.totalRecipes
-    let totalPercentages = preferences.composition.reduce((prev, curr) => prev + curr.percentage, 0)
-
-    const promises: any = []
-    preferences.composition.forEach((c) => {
-      const limit = Math.round((c.percentage / totalPercentages) * n)
-      if (limit === 0) return
-      promises.push(this.fetchRecipe(c.category, limit))
-    })
-    const result = await Promise.all(promises)
-
-    const recipes: any[] = []
-
-    result.forEach((rs) => {
-      rs.forEach((recipe: IRecipe) => {
-        recipes.push({
-          _id: recipe._id,
-          category: recipe.category,
-          image_url: recipe.image_url,
-          ingredients: recipe.ingredients,
-          recipe_link: recipe.recipe_link,
-          recipe_name: recipe.recipe_name,
-          price: this.getRandomPrice(preferences.startPrice, preferences.endPrice),
-        })
-      })
-    })
-
-    const menu: IMenu = {
-      ayce: true,
-      name: restaurant.nome + ' menu',
-      recipes: recipes,
-    }
-
-    restaurant.menus.push(menu)
-    await restaurant.save()
-    return menu
   }
 
   public async updateMenu(): Promise<IMenu> {
@@ -632,7 +571,7 @@ class RestaurantService extends AbstractService<IRestaurant> {
   public async add(data: IRestaurant): Promise<IRestaurant> {
     const restaurant = await super.add(data)
     try {
-      await restaurantService.createNode({ _id: restaurant._id, name: restaurant.nome, comune: restaurant.comune })
+      await restaurantService.createNode({ id: restaurant._id, name: restaurant.nome, comune: restaurant.comune })
     } catch (error) {
       await super.delete(data._id)
       throw new Error('Failed to add restaurant in neo4j')

@@ -335,24 +335,6 @@ export default (app: Router) => {
     }
   })
 
-  // create menu
-  route.post(
-    '/menu/:id',
-    body('composition').exists().isArray(),
-    body('totalRecipes').exists().isNumeric(),
-    body('startPrice').exists().isNumeric(),
-    body('endPrice').exists().isNumeric(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const menu = await RestaurantService.createMenu(req.params.id, req.body)
-        res.json(menu)
-      } catch (e) {
-        handleError(res, e)
-      }
-    }
-  )
-
   // update menu
   route.put('/menu', body('email').isEmail(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
     try {
