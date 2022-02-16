@@ -1,7 +1,7 @@
 import { BaseNeo4jService } from './baseNeo4j.service'
 
 export interface RecipeNodeProps {
-  _id: string
+  id: string
   name: string
   category?: string
   image_url?: string
@@ -9,7 +9,7 @@ export interface RecipeNodeProps {
 
 class RecipeService extends BaseNeo4jService<RecipeNodeProps> {
   constructor() {
-    super('Recipe', [])
+    super('Recipes', [])
   }
 }
 

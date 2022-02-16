@@ -9,6 +9,7 @@ export interface IMenu {
   name: string
   recipes: MenuRecipes[]
   ayce: boolean
+  price?: number
 }
 
 export interface IRestaurant extends Document {
