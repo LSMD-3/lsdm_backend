@@ -1,13 +1,10 @@
-import { Neo4jClient } from "../utils/Neo4jClient";
+import { Neo4jClient } from '../utils/Neo4jClient'
 
-
-class UserGenerator{
-
-
- async  generateRandomUserFollows(userId: string, n: number) {
-  // TODO
-  const session = Neo4jClient.session()
-  await session.run(`
+class UserGenerator {
+  async generateRandomUserFollows(userId: string, n: number) {
+    // TODO
+    const session = Neo4jClient.session()
+    await session.run(`
   
   WITH ${n} as followRange
       MATCH (u:Users)
@@ -16,21 +13,19 @@ class UserGenerator{
       WITH u2, apoc.coll.randomItems(allusers, followRange) as allusers
       FOREACH (user in allusers | CREATE (user)-[:FOLLOWS]->(u2))
   `)
-  session.close()
-  return `${n} follow relationships generated for ${userId}`;
-}
-
-
+    session.close()
+    return `${n} follow relationships generated for ${userId}`
+  }
 
   generateInfluencerUserFollows(userId: string, n: number) {
-  // userId of influencer
-  // n -> number of follower to add
-}
+    // userId of influencer
+    // n -> number of follower to add
+  }
 
- async  generateRandomRestaurantLike(userId: string, n: number) {
-  // TODO
-  const session = Neo4jClient.session()
-  await session.run(`
+  async generateRandomRestaurantLike(userId: string, n: number) {
+    // TODO
+    const session = Neo4jClient.session()
+    await session.run(`
   
   WITH ${n} as likeRange
       MATCH (r:Restaurants)
@@ -39,14 +34,14 @@ class UserGenerator{
       WITH u2, apoc.coll.randomItems(allrestaurants, likeRange) as allrestaurants
       FOREACH (restaurant in allrestaurants | CREATE (u2)-[:LIKES]->(restaurant))
   `)
-  session.close()
-  return `${n} liked relationships generated for ${userId}`;
-}
+    session.close()
+    return `${n} liked relationships generated for ${userId}`
+  }
 
- async  generateRandomRecipeLike(userId: string, n: number) {
-  // TODO
-  const session = Neo4jClient.session()
-  await session.run(`
+  async generateRandomRecipeLike(userId: string, n: number) {
+    // TODO
+    const session = Neo4jClient.session()
+    await session.run(`
   
   WITH ${n} as likeRange
       MATCH (r:Recipes)
@@ -55,10 +50,9 @@ class UserGenerator{
       WITH u2, apoc.coll.randomItems(allrecipes, likeRange) as allrecipes
       FOREACH (recipe in allrecipes | CREATE (u2)-[:LIKES]->(recipe))
   `)
-  session.close()
-  return `${n} liked relationships generated for ${userId}`;
-}
-
+    session.close()
+    return `${n} liked relationships generated for ${userId}`
+  }
 }
 
 export default new UserGenerator()
