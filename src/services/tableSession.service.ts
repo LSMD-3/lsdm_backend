@@ -35,39 +35,43 @@ class TableSessionService extends AbstractService<ITableSession> {
   }
 
   public async getAndSaveTableSession(restaurant: any, table: string) {
+    console.log('IN SESSIOSN')
     let order_history = await RedisClient.db.HKEYS(`VR_${restaurant._id}_Table_${table}_Orders_History`)
 
     order_history.forEach(async (element, index) => {
       let order_list = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
       let partecipants = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
       let ordersToSave: IOrder[] = []
+      console.log('###########ORDERS##################')
 
       for (let i = 0; i < order_list.length; i++) {
         let parsed_orders = JSON.parse(order_list[i])
-
         console.log(parsed_orders)
-        console.log(partecipants[index])
         ordersToSave.push({ client: parsed_orders[1], recipes: parsed_orders[0] })
+        console.log('------------------------')
       }
-      let parsed_partecipants = JSON.parse(partecipants[index])
-      const session = new TableSession({ restaurant: restaurant, tableId: table, parsed_partecipants, orders: ordersToSave })
-      // //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
-      // //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
-      // let table_still_active = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table}_Orders`)
-      // if (!table_still_active) {
-      //   let update_tables = await RedisClient.db.HGET(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
-      //   update_tables = JSON.parse(update_tables)
-      //   const index = update_tables.indexOf(table_id)
-      //   if (index > -1) {
-      //     update_tables.splice(index, 1) // 2nd parameter means remove one item only
-      //   }
-      //   update_tables = JSON.stringify(update_tables)
-      //   await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
-      // }
+      let parsed_partecipants = JSON.parse(partecipants[0])
+      console.log('#########PARTECIPANTS#######################')
+      console.log(parsed_partecipants)
+      console.log('°°°°°°°°°END°°°°°°°°°°°°°°°')
+      const session = new TableSession({ restaurant: restaurant, tableId: table, partecipants: parsed_partecipants, orders: ordersToSave })
+      await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
+      await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
+      let table_still_active = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table}_Orders`)
+      if (!table_still_active) {
+        let update_tables = await RedisClient.db.HGET(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
+        update_tables = JSON.parse(update_tables)
+        const index = update_tables.indexOf(table)
+        if (index > -1) {
+          update_tables.splice(index, 1) // 2nd parameter means remove one item only
+        }
+        update_tables = JSON.stringify(update_tables)
+        await RedisClient.db.HSET('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
+      }
       await session.save()
     })
-    // await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History`)
-    //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History`)
+    await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History`)
+    await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History`)
 
     return
   }
@@ -76,6 +80,7 @@ class TableSessionService extends AbstractService<ITableSession> {
    */
 
   public async backupRestaurant(restaurant: any) {
+    console.log('INNER ')
     console.log(restaurant)
     let tables = await RedisClient.db.HGET('Active_Restaurants', `${restaurant}_Active_Tables`)
     let tableInfo = await RedisClient.db.HGET('Active_Restaurants', `${restaurant}`)
@@ -92,7 +97,7 @@ class TableSessionService extends AbstractService<ITableSession> {
   public async backupFromRedis() {
     // 1. retrive all active restaurant from redis
     let keys = await RedisClient.db.HKEYS('Active_Restaurants')
-    console.log(keys)
+    console.log('IN BACK')
     var PATTERN = '_Active_Table'
     let filtered = keys.filter(function (str) {
       return str.indexOf(PATTERN) === -1

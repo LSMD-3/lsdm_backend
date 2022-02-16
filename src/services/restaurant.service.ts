@@ -255,12 +255,12 @@ class RestaurantService extends AbstractService<IRestaurant> {
       await this.hset(
         `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History`,
         String(order_hist_number + 1),
-        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${+String(order_hist_number + 1)}`
+        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${String(order_hist_number + 1)}`
       )
 
       let res1 = await this.clone(
         `VR_${restaurant._id}_Table_${table_id}_all_customers`,
-        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${+String(order_hist_number + 1)}`
+        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${String(order_hist_number + 1)}`
       )
       let del = await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table_id}_Orders`)
       del = await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
