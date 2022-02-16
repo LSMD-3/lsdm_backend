@@ -34,58 +34,76 @@ class TableSessionService extends AbstractService<ITableSession> {
     return orders
   }
 
-  public async getAndSaveTableSession(restaurant: string, table: string) {
-    let order_history = await RedisClient.db.HKEYS('VR_' + restaurant + '_Table_' + table + '_Orders_History')
+  public async getAndSaveTableSession(restaurant: any, table: string) {
+    let order_history = await RedisClient.db.HKEYS(`VR_${restaurant._id}_Table_${table}_Orders_History`)
 
-    const response: any[] = []
-    // console.log(order_history)
-    order_history.forEach(async (element) => {
-      // console.log(`LOOKING FOR rest:${restaurant}, table:${table}, session:${element}`)
-      let order_list = await RedisClient.db.HVALS(`VR_${restaurant}_Table_${table}_Orders_History_${element}`)
-      let order_list_users = await RedisClient.db.HVALS(`VR_${restaurant}_Table_${table}_Orders_History_to_users_${element}`)
-
+    order_history.forEach(async (element, index) => {
+      let order_list = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
+      let partecipants = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
       let ordersToSave: IOrder[] = []
-      // const orders = JSON.parse(order_list)
-      order_list.forEach(async (order, index) => {
-        const user: string = order_list_users[index]
-        ordersToSave = ordersToSave.concat(this.extractOrdersfromRawValues(order, user, index))
-      })
-      const partecipants = [...new Set(order_list_users)]
-      const session = new TableSession({ restaurantId: restaurant, tableId: table, partecipants, orders: ordersToSave })
-      response.push({ session: `VR_${restaurant}_Table_${table}_Orders_History_${element}`, orders: ordersToSave.length })
-      await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_${element}`)
-      await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_to_users_${element}`)
+
+      for (let i = 0; i < order_list.length; i++) {
+        let parsed_orders = JSON.parse(order_list[i])
+
+        console.log(parsed_orders)
+        console.log(partecipants[index])
+        ordersToSave.push({ client: parsed_orders[1], recipes: parsed_orders[0] })
+      }
+      let parsed_partecipants = JSON.parse(partecipants[index])
+      const session = new TableSession({ restaurant: restaurant, tableId: table, parsed_partecipants, orders: ordersToSave })
+      // //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
+      // //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
+      // let table_still_active = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table}_Orders`)
+      // if (!table_still_active) {
+      //   let update_tables = await RedisClient.db.HGET(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
+      //   update_tables = JSON.parse(update_tables)
+      //   const index = update_tables.indexOf(table_id)
+      //   if (index > -1) {
+      //     update_tables.splice(index, 1) // 2nd parameter means remove one item only
+      //   }
+      //   update_tables = JSON.stringify(update_tables)
+      //   await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
+      // }
       await session.save()
     })
-    await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History`)
-    await RedisClient.db.DEL(`VR_${restaurant}_Table_${table}_Orders_History_to_users`)
+    // await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History`)
+    //await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History`)
 
-    return response
+    return
   }
 
   /*'[{"rec_1":4,"quantity":3,"notes":"no spice","status":"preparing"},{"rec_1":4,"quantity":3,"notes":"no spice","status":"preparing"},{"rec_1":4,"quantity":3,"notes":"no spice","status":"preparing"}]'
    */
 
-  public async backupRestaurant(restaurant: string) {
-    const tables = await this.getRestaurantTables(restaurant)
-    if (!tables) return { restauranId: restaurant, total_sessions: 0 }
+  public async backupRestaurant(restaurant: any) {
+    console.log(restaurant)
+    let tables = await RedisClient.db.HGET('Active_Restaurants', `${restaurant}_Active_Tables`)
+    let tableInfo = await RedisClient.db.HGET('Active_Restaurants', `${restaurant}`)
+    tables = JSON.parse(tables)
+    tableInfo = JSON.parse(tableInfo)
+    if (!tables) return { restaurant: tableInfo, total_sessions: 0 }
     console.log('Backing up restaurant: ' + restaurant)
-    const promises = tables.map((t) => this.getAndSaveTableSession(restaurant, t))
-    const result = await Promise.all(promises)
-
-    return result
+    const promises = tables.map((t) => this.getAndSaveTableSession(tableInfo, t))
+    // const result = await Promise.all(promises)
+    console.log(tables)
+    return 'ok' //result
   }
 
   public async backupFromRedis() {
     // 1. retrive all active restaurant from redis
     let keys = await RedisClient.db.HKEYS('Active_Restaurants')
-    const promises = keys.map((k) => this.backupRestaurant(k))
+    console.log(keys)
+    var PATTERN = '_Active_Table'
+    let filtered = keys.filter(function (str) {
+      return str.indexOf(PATTERN) === -1
+    })
+
+    const promises = filtered.map((k) => this.backupRestaurant(k))
 
     const result = await Promise.all(promises)
-
-    return result
+    return 'ok'
+    //return result
   }
-
   public async getRecipesRanking(reduced: boolean) {
     const pipeline = [
       {

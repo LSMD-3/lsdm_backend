@@ -243,16 +243,28 @@ class RestaurantService extends AbstractService<IRestaurant> {
         `VR_${restaurant._id}_Table_${table_id}_Orders_History_` + String(order_hist_number + 1)
       )
 
+      await this.hset(
+        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History`,
+        String(order_hist_number + 1),
+        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${+String(order_hist_number + 1)}`
+      )
+
+      let res1 = await this.clone(
+        `VR_${restaurant._id}_Table_${table_id}_all_customers`,
+        `VR_${restaurant._id}_Table_${table_id}_Orders_Customers_History_${+String(order_hist_number + 1)}`
+      )
       let del = await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table_id}_Orders`)
-      let update_tables = await this.hget('Active_Restaurants', `${restaurant._id}_Active_Tables`)
-      update_tables = JSON.parse(update_tables)
-      const index = update_tables.indexOf(table_id)
-      if (index > -1) {
-        update_tables.splice(index, 1) // 2nd parameter means remove one item only
-      }
-      update_tables = JSON.stringify(update_tables)
-      await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
+      del = await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
+      //let update_tables = await this.hget('Active_Restaurants', `${restaurant._id}_Active_Tables`)
+      // update_tables = JSON.parse(update_tables)
+      // const index = update_tables.indexOf(table_id)
+      // if (index > -1) {
+      //   update_tables.splice(index, 1) // 2nd parameter means remove one item only
+      // }
+      // update_tables = JSON.stringify(update_tables)
+      // await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
       //return del
+      return del
     }
     return 'something went wrong'
   }

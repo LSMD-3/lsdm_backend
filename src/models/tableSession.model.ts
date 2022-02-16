@@ -4,18 +4,10 @@ import { mongoConnections } from '@/loaders/mongoose'
 
 var TableSession = new Schema(
   {
-    restaurantId: { type: String, required: true },
+    restaurantId: { type: JSON },
     tableId: { type: String, required: true },
-    partecipants: [{ type: Schema.Types.ObjectId, ref: 'users' }],
-    orders: [
-      {
-        _id: false,
-        clientId: { type: Schema.Types.ObjectId, ref: 'users' },
-        recipeId: { type: Schema.Types.ObjectId, ref: 'recipes' },
-        quantity: { type: Number, required: true },
-        orderNumber: { type: Number, required: true },
-      },
-    ],
+    partecipants: [{ type: JSON }],
+    orders: [{ type: JSON }],
   },
   {
     timestamps: true,
