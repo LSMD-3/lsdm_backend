@@ -126,13 +126,13 @@ export default (app: Router) => {
 
   route.post(
     '/get_all_orders',
-    body('restaurant_id').exists(),
+    body('restaurant').exists(),
     body('table_id').exists(),
 
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const response = await RestaurantService.get_all_orders(req.body.restaurant_id, req.body.table_id)
+        const response = await RestaurantService.get_all_orders(req.body.restaurant, req.body.table_id)
         res.json(response)
       } catch (e) {
         handleError(res, e)
@@ -292,13 +292,13 @@ export default (app: Router) => {
   )
   route.post(
     '/get_table_users',
-    body('restaurant_id').exists().isString(),
-    body('table_id').exists().isString(),
+    body('restaurant').exists(),
+    body('table_id').exists(),
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const userIds = await RestaurantService.get_table_users(req.body.restaurant_id, req.body.table_id)
-        const users = await User.find({ _id: { $in: userIds } }, 'name surname')
+        const users = await RestaurantService.get_table_users(req.body.restaurant, req.body.table_id)
+
         res.json(users)
       } catch (e) {
         handleError(res, e)
