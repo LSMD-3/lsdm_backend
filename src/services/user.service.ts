@@ -30,7 +30,7 @@ class UserService extends AbstractService<IUser> {
   public async add(data: IUser): Promise<IUser> {
     const user = await super.add(data)
     try {
-      await userService.createNode({ _id: data._id, email: data.email, name: data.name, surname: data.surname })
+      await userService.createNode({ id: data._id, email: data.email, name: data.name, surname: data.surname })
     } catch (error) {
       await super.delete(data._id)
       throw new Error('Failed to add user in neo4j')

@@ -6,6 +6,8 @@ export const mongoConnections: { [name: string]: Connection } = getObject(
     const conn = mongoose.createConnection(dbObject.uri, {
       connectTimeoutMS: 5000,
       maxPoolSize: 5,
+      w: 1,
+      readPreference: 'nearest',
     })
 
     conn.once('open', () => {

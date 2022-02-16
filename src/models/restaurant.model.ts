@@ -30,21 +30,9 @@ var Restaurant = new Schema(
         ayce: { type: Boolean },
         name: { type: String },
         recipes: [{ type: JSON }],
+        price: { type: Number },
       },
     ],
-    menu: {
-      _id: false,
-      ayce_available: { type: Boolean },
-      name: { type: String },
-      recipes: [
-        {
-          _id: false,
-          recipe: { type: Schema.Types.ObjectId, ref: 'recipes' },
-          price: { type: Number, required: true },
-          max_quantity: { type: Number },
-        },
-      ],
-    },
   },
   {
     timestamps: true,

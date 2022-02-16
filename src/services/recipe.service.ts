@@ -99,7 +99,7 @@ class RecipeService extends AbstractService<IRecipe> {
   public async add(data: IRecipe): Promise<IRecipe> {
     const recipe = await super.add(data)
     try {
-      await recipeService.createNode({ _id: recipe._id, name: recipe.recipe_name, image_url: recipe.image_url, category: recipe.category })
+      await recipeService.createNode({ id: recipe._id, name: recipe.recipe_name, image_url: recipe.image_url, category: recipe.category })
     } catch (error) {
       await super.delete(data._id)
       throw new Error('Failed to add recipe in neo4j')

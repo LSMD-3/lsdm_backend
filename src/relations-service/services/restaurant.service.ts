@@ -1,14 +1,14 @@
 import { BaseNeo4jService } from './baseNeo4j.service'
 
 export interface RestaurantNodeProps {
-  _id: string
+  id: string
   name: string
   comune: string
 }
 
 class RestaurantService extends BaseNeo4jService<RestaurantNodeProps> {
   constructor() {
-    super('Restaurant', [{ to: 'Recipe', relations: ['HAS'] }])
+    super('Restaurant', [{ to: 'Recipes', relations: ['HAS'] }])
   }
 }
 

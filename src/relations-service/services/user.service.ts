@@ -2,7 +2,7 @@ import { Neo4jClient } from '../utils/Neo4jClient'
 import { BaseNeo4jService } from './baseNeo4j.service'
 
 export interface UserNodeProps {
-  _id: string
+  id: string
   email: string
   name: string
   surname: string
@@ -11,7 +11,7 @@ export interface UserNodeProps {
 class UserService extends BaseNeo4jService<UserNodeProps> {
   constructor() {
     super('User', [
-      { relations: ['EATS', 'LIKES'], to: 'Recipe' },
+      { relations: ['EATS', 'LIKES'], to: 'Recipes' },
       { relations: ['FOLLOWS'], to: 'User' },
       { relations: ['LIKES'], to: 'Restaurant' },
     ])

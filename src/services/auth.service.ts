@@ -26,7 +26,7 @@ export interface RefreshJwtUserTokenValues {
 class AuthService {
   public async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      let user = await User.findOne({ email }).populate('role')
+      let user = await User.findOne({ email })
       if (!user)
         throw new DomainError(
           '',
@@ -103,8 +103,7 @@ class AuthService {
   }
 
   private getUserJwtValues(user: IUser): JwtUserTokenValues {
-    if (!user.role) return { email: user.email, iss: ISSUER, permissions: [], sudo: false, id: user._id }
-    return { email: user.email, iss: ISSUER, permissions: user.role.permissionKeys, sudo: user.role.sudo, id: user._id }
+    return { email: user.email, iss: ISSUER, permissions: [], sudo: false, id: user._id }
   }
 
   private getRefreshTokenValues(user: IUser): RefreshJwtUserTokenValues {
@@ -125,7 +124,7 @@ class AuthService {
       throw new DomainError('', 401, NOT_AUTHORIZED_CODE.TOKEN_INVALID, 'Token is expired or invalid')
     }
     if (!tokenValues || !tokenValues.id) throw new DomainError('', 401, NOT_AUTHORIZED_CODE.TOKEN_INVALID, 'Token is expired or invalid')
-    const user = await User.findById(tokenValues.id).populate('role')
+    const user = await User.findById(tokenValues.id)
     return user!
   }
 
