@@ -9,51 +9,33 @@ const route = Router()
 export default (app: Router) => {
   app.use('/generate', route)
 
-  route.post(
-    '/usersfollows',
-    body('id').exists(),
-    body('numOfFollows').isNumeric(),
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { userId } = req.body.id
-        const { numOfFollows } = req.body.numOfFollows
-        const result = await userGenerator.generateRandomUserFollows(userId, numOfFollows)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.post('/usersfollows', body('id').exists(), body('num').isNumeric(), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id, num } = req.body
+      const result = await userGenerator.generateRandomUserFollows(id, num)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
-  route.post(
-    '/recipeslikes',
-    body('id').exists(),
-    body('numOfFollows').isNumeric(),
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { userId } = req.body.id
-        const { numOfFollows } = req.body.numOfFollows
-        const result = await userGenerator.generateRandomRecipeLike(userId, numOfFollows)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.post('/recipeslikes', body('id').exists(), body('num').isNumeric(), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id, num } = req.body
+      const result = await userGenerator.generateRandomRecipeLike(id, num)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
-  route.post(
-    '/restaurants',
-    body('id').exists(),
-    body('numOfFollows').isNumeric(),
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { userId } = req.body.id
-        const { numOfFollows } = req.body.numOfFollows
-        const result = await userGenerator.generateRandomRestaurantLike(userId, numOfFollows)
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.post('/restaurantslikes', body('id').exists(), body('num').isNumeric(), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id, num } = req.body
+      const result = await userGenerator.generateRandomRestaurantLike(id, num)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 }
