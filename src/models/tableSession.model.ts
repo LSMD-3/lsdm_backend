@@ -4,7 +4,7 @@ import { mongoConnections } from '@/loaders/mongoose'
 
 var TableSession = new Schema(
   {
-    restaurantId: { type: JSON },
+    restaurant: { type: JSON },
     tableId: { type: String, required: true },
     partecipants: [{ type: JSON }],
     orders: [{ type: JSON }],

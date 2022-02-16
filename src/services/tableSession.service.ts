@@ -35,43 +35,57 @@ class TableSessionService extends AbstractService<ITableSession> {
   }
 
   public async getAndSaveTableSession(restaurant: any, table: string) {
-    console.log('IN SESSIOSN')
     let order_history = await RedisClient.db.HKEYS(`VR_${restaurant._id}_Table_${table}_Orders_History`)
+    console.log('SESSIOn')
+    console.log(` trying VR_${restaurant._id}_Table_${table}_Orders_History`)
 
-    order_history.forEach(async (element, index) => {
+    order_history.forEach(async (element) => {
       let order_list = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
       let partecipants = await RedisClient.db.HVALS(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
       let ordersToSave: IOrder[] = []
-      console.log('###########ORDERS##################')
 
       for (let i = 0; i < order_list.length; i++) {
         let parsed_orders = JSON.parse(order_list[i])
-        console.log(parsed_orders)
+
         ordersToSave.push({ client: parsed_orders[1], recipes: parsed_orders[0] })
-        console.log('------------------------')
       }
+
       let parsed_partecipants = JSON.parse(partecipants[0])
-      console.log('#########PARTECIPANTS#######################')
-      console.log(parsed_partecipants)
-      console.log('°°°°°°°°°END°°°°°°°°°°°°°°°')
-      const session = new TableSession({ restaurant: restaurant, tableId: table, partecipants: parsed_partecipants, orders: ordersToSave })
-      await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
-      await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
-      let table_still_active = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table}_Orders`)
-      if (!table_still_active) {
-        let update_tables = await RedisClient.db.HGET(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
-        update_tables = JSON.parse(update_tables)
-        const index = update_tables.indexOf(table)
-        if (index > -1) {
-          update_tables.splice(index, 1) // 2nd parameter means remove one item only
-        }
-        update_tables = JSON.stringify(update_tables)
-        await RedisClient.db.HSET('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
+      const session = new TableSession({
+        restaurant: restaurant,
+        tableId: table,
+        partecipants: parsed_partecipants,
+        orders: ordersToSave,
+      })
+
+      try {
+        await session.save()
+        await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History_${element}`)
+        await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History_${element}`)
+      } catch (e) {
+        console.log(`error VR_${restaurant._id}_Table_${table}_Orders_History`)
       }
-      await session.save()
+      console.log('SESSION END')
     })
     await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_History`)
     await RedisClient.db.DEL(`VR_${restaurant._id}_Table_${table}_Orders_Customers_History`)
+    let table_still_active = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table}_Orders`)
+    if (!table_still_active) {
+      console.log('IN')
+      let update_tables = await RedisClient.db.HGET(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
+      update_tables = JSON.parse(update_tables)
+      const index = update_tables.indexOf(table)
+      if (index > -1) {
+        update_tables.splice(index, 1) // 2nd parameter means remove one item only
+      }
+      if (update_tables.length > 0) {
+        update_tables = JSON.stringify(update_tables)
+        await RedisClient.db.HSET('Active_Restaurants', `${restaurant._id}_Active_Tables`, update_tables)
+      } else {
+        await RedisClient.db.HDEL(`Active_Restaurants`, `${restaurant._id}_Active_Tables`)
+        await RedisClient.db.HDEL(`Active_Restaurants`, `${restaurant._id}`)
+      }
+    }
 
     return
   }
@@ -89,8 +103,8 @@ class TableSessionService extends AbstractService<ITableSession> {
     if (!tables) return { restaurant: tableInfo, total_sessions: 0 }
     console.log('Backing up restaurant: ' + restaurant)
     const promises = tables.map((t) => this.getAndSaveTableSession(tableInfo, t))
-    // const result = await Promise.all(promises)
-    console.log(tables)
+    const result = await Promise.all(promises)
+
     return 'ok' //result
   }
 

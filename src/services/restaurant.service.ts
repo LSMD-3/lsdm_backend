@@ -63,42 +63,46 @@ class RestaurantService extends AbstractService<IRestaurant> {
   }
 
   public async createTablenew(restaurant: any, table_id: string) {
-    console.log(restaurant)
-
     var restaurant_exists = await RedisClient.db.HEXISTS('Active_Restaurants', restaurant._id)
     if (!restaurant_exists) {
       await this.hset('Active_Restaurants', String(restaurant._id), JSON.stringify(restaurant))
-      console.log([table_id])
+
       await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, JSON.stringify([table_id]))
     } else {
       let table_array = await this.hget('Active_Restaurants', `${restaurant._id}_Active_Tables`)
       table_array = JSON.parse(table_array)
-      if (!table_array.includes(table_id)) table_array.push(table_id)
+      if (!table_array.includes(table_id)) {
+        table_array.push(table_id)
 
-      await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, JSON.stringify(table_array))
+        await this.hset('Active_Restaurants', `${restaurant._id}_Active_Tables`, JSON.stringify(table_array))
+      }
     }
 
     return 'VR_' + restaurant._id + '_Table_' + table_id
   }
 
   public async add_table_partecipants(restaurant: any, table_id: string, customer: any) {
-    let table_customers_exist = await this.exist(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
-    console.log(table_customers_exist)
-    if (!table_customers_exist) {
-      await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify([customer]))
-    } else {
-      let allcutomers = await this.hget(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1))
-      allcutomers = JSON.parse(allcutomers)
-      console.log(allcutomers)
-      let flag = 1
-      for (let i = 0; i < allcutomers.length; i++) {
-        if (allcutomers[i]._id == customer._id) {
-          flag = 0
+    var table_exist = await this.hget('Active_Restaurants', `${restaurant._id}_Active_Tables`) // Check if table already exists
+    table_exist = JSON.parse(table_exist)
+    if (table_exist.includes(table_id)) {
+      let table_customers_exist = await this.exist(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
+
+      if (!table_customers_exist) {
+        await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify([customer]))
+      } else {
+        let allcutomers = await this.hget(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1))
+        allcutomers = JSON.parse(allcutomers)
+
+        let flag = 1
+        for (let i = 0; i < allcutomers.length; i++) {
+          if (allcutomers[i]._id == customer._id) {
+            flag = 0
+          }
         }
-      }
-      if (flag) {
-        allcutomers.push(customer)
-        await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify(allcutomers))
+        if (flag) {
+          allcutomers.push(customer)
+          await this.hset(`VR_${restaurant._id}_Table_${table_id}_all_customers`, String(1), JSON.stringify(allcutomers))
+        }
       }
     }
     return 'ok'
@@ -106,9 +110,8 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
   public async join_tablenew(restaurant: any, table_id: string, customer: any) {
     let restaurant_exist = await this.exists_in('Active_Restaurants', restaurant._id) // Check if restaurant already exists
-    console.log(restaurant_exist)
+
     if (!restaurant_exist) {
-      console.log('E')
       await this.createTablenew(restaurant, table_id)
       await this.add_table_partecipants(restaurant, table_id, customer)
     } else {
@@ -120,27 +123,32 @@ class RestaurantService extends AbstractService<IRestaurant> {
       }
       await this.add_table_partecipants(restaurant, table_id, customer)
     }
-    return 'ok'
+    return 0
   }
 
   public async createOrdernew(restaurant: any, table_id: string, user: any, orders: any[]) {
-    var table_exists = await RedisClient.db.HEXISTS('VR_' + restaurant._id, 'Table_' + table_id + '_customers')
+    var table_exist = await this.hget('Active_Restaurants', `${restaurant._id}_Active_Tables`) // Check if table already exists
+    table_exist = JSON.parse(table_exist)
+    if (table_exist.includes(table_id)) {
+      var table_exists = await RedisClient.db.HLEN(`VR_${restaurant._id}_Table_${table_id}_all_customers`)
 
-    let orders_len: number = 0
-    let exists = await RedisClient.db.HLEN('VR_' + restaurant._id + '_Table_' + table_id + '_Orders')
-    if (exists == 0) {
-      //check if orders exists
-      this.hset(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(1), JSON.stringify([orders, user]))
-      //this.hset(`VR_${restaurant._id}_Table_${table_id}_Customers`, String(1), JSON.stringify(user))
+      if (table_exists != 0) {
+        let orders_len: number = 0
+        let exists = await RedisClient.db.HLEN('VR_' + restaurant._id + '_Table_' + table_id + '_Orders')
+        if (exists == 0) {
+          //check if orders exists
+          this.hset(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(1), JSON.stringify([orders, user]))
+          //this.hset(`VR_${restaurant._id}_Table_${table_id}_Customers`, String(1), JSON.stringify(user))
 
-      return 'ok_1'
-    } else {
-      orders_len = exists + 1
-      this.hset(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(orders_len), JSON.stringify([orders, user]))
-      // this.hset(`VR_${restaurant._id}_Table_${table_id}_Customers`, String(orders_len), JSON.stringify(user))
-    }
-
-    return `ok_${orders_len}`
+          return 'ok_1'
+        } else {
+          orders_len = exists + 1
+          this.hset(`VR_${restaurant._id}_Table_${table_id}_Orders`, String(orders_len), JSON.stringify([orders, user]))
+          // this.hset(`VR_${restaurant._id}_Table_${table_id}_Customers`, String(orders_len), JSON.stringify(user))
+        }
+        return `ok_${orders_len}`
+      }
+    } else return 'Table not found'
   }
 
   public async get_ordernew(restaurant: any, table_id: any, order_id: any) {
@@ -171,10 +179,10 @@ class RestaurantService extends AbstractService<IRestaurant> {
     orders = orders.reverse()
     let user_orders = []
     for (let i = 0; i < Object.keys(orders).length; i++) {
-      console.log()
+      // console.log()
       if (customer._id === orders[i][1]._id) {
-        console.log(orders[i][1]._id)
-        console.log(orders[i][0])
+        // console.log(orders[i][1]._id)
+        // console.log(orders[i][0])
         user_orders.push(orders[i][0])
       }
     }
@@ -195,8 +203,8 @@ class RestaurantService extends AbstractService<IRestaurant> {
       console.log(e)
     }
     const result: TableOrder[] = []
-    console.log(keys)
-    console.log('&&&&&&&&&&&&&&&&&&&&&&&')
+    // console.log(keys)
+    // console.log('&&&&&&&&&&&&&&&&&&&&&&&')
     keys = JSON.parse(keys)
 
     for (let i = 0; i < keys.length; i++) {
@@ -205,9 +213,9 @@ class RestaurantService extends AbstractService<IRestaurant> {
 
       orders = orders.reverse()
       for (let j = 0; j < orders.length; j++) {
-        console.log('======================')
-        console.log(orders[j][0])
-        console.log('======================')
+        // console.log('======================')
+        // console.log(orders[j][0])
+        // console.log('======================')
         result.push({ tableId: table_id, orders: orders[j][0] })
       }
       //console.log(orders)
