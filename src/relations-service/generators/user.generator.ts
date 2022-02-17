@@ -2,7 +2,6 @@ import { Neo4jClient } from '../utils/Neo4jClient'
 
 class UserGenerator {
   async generateRandomUserFollows(userId: string, n: number) {
-    // TODO
     const session = Neo4jClient.session()
     await session.run(`WITH ${n} as followRange
       MATCH (u:User)
@@ -21,7 +20,6 @@ class UserGenerator {
   }
 
   async generateRandomRestaurantLike(userId: string, n: number) {
-    // TODO
     const session = Neo4jClient.session()
     await session.run(`
   
@@ -37,7 +35,6 @@ class UserGenerator {
   }
 
   async generateRandomRecipeLike(userId: string, n: number) {
-    // TODO
     const session = Neo4jClient.session()
     await session.run(`
   
