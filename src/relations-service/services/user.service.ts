@@ -78,10 +78,14 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
   async suggestOtherFriends(userId: string): Promise<any> {
     //Method that suggest other friends to follow based on friends you are following
     const session = Neo4jClient.session()
-    const results = await session.run(`MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
-    (otherFriends1)-[:FOLLOWS]->(user3:User)-[:FOLLOWS]->(otherFriends2:User) RETURN otherFriends2 AS SuggestedFriends, count(*)AS Strength
-    ORDER BY Strength DESC
-    LIMIT 30`)
+    const results = await session.run(`
+      MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
+      (otherFriends1)-[:FOLLOWS]->(user3:User)-[:FOLLOWS]->(otherFriends2:User)
+      WHERE NOT EXISTS((user1)-[:FOLLOWS]->(otherFriends2))
+      RETURN otherFriends2 AS SuggestedFriends, count(*)AS Strength
+      ORDER BY Strength DESC
+      LIMIT 30
+    `)
     return results.records.map((r) => {
       return r.get('SuggestedFriends').properties
     })
@@ -90,19 +94,23 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
   async suggestOtherRecipes(userId: string): Promise<any> {
     //Method to suggest other recipes liked by other friends you might follow or know
     const session = Neo4jClient.session()
-    const results = await session.run(`MATCH (user:User {id:"${userId}"})
-    WITH (user)
-    CALL {
-    MATCH (user)-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(user3:User), (user3)-[:FOLLOWS]->(:User)-[:LIKES]->(recipe:Recipes)
-    RETURN 'suggested' as type, recipe AS SuggestedRecipes, count(*) AS Strength
-    UNION
-    MATCH (user)-[:LIKES]->(:Recipe)<-[:LIKES]-(otherUser:User),
-    (otherUser)-[:LIKES]->(otherRecipe:Recipes)
-    RETURN 'otherSuggested' as type, otherRecipe AS SuggestedRecipes, count(*) AS Strength
-    }
-    RETURN type, SuggestedRecipes, Strength
-    ORDER BY Strength DESC
-    LIMIT 30`)
+    const results = await session.run(`
+      MATCH (user:User {id:"${userId}"})
+      WITH (user)
+      CALL {
+      MATCH (user)-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(user3:User), (user3)-[:FOLLOWS]->(:User)-[:LIKES]->(recipe:Recipes)
+      WHERE NOT EXISTS((user)-[:LIKES]->(:Recipes))
+      RETURN 'suggested' as type, recipe AS SuggestedRecipes, count(*) AS Strength
+      UNION
+      MATCH (user)-[:LIKES]->(:Recipes)<-[:LIKES]-(otherUser:User),
+      (otherUser)-[:LIKES]->(otherRecipe:Recipes)
+      WHERE NOT EXISTS((user)-[:LIKES]->(otherRecipe))
+      RETURN 'otherSuggested' as type, otherRecipe AS SuggestedRecipes, count(*) AS Strength
+      }
+      RETURN type, SuggestedRecipes, Strength
+      ORDER BY Strength DESC
+      LIMIT 30
+    `)
     return results.records.map((r) => {
       return r.get('SuggestedRecipes').properties
     })
@@ -111,21 +119,41 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
   async suggestOtherRestaurants(userId: string): Promise<any> {
     //Method to suggest other Restaurants liked by other friends you might potentially follow
     const session = Neo4jClient.session()
-    const results = await session.run(`MATCH (user:User {id:"${userId}"})
-    WITH (user)
-    CALL {
-    MATCH (user)-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(user3:User), (user3)-[:FOLLOWS]->(:User)-[:LIKES]->(restaurant:Restaurant)
-    RETURN 'suggested' as type, restaurant AS SuggestedRestaurants, count(*) AS Strength
-    UNION
-    MATCH (user)-[:LIKES]->(:Restaurant)<-[:LIKES]-(otherUser:User),
-    (otherUser)-[:LIKES]->(otherRestaurant:Restaurant)
-    RETURN 'otherSuggested' as type, otherRestaurant AS SuggestedRestaurants, count(*) AS Strength
-    }
-    RETURN type, SuggestedRestaurants, Strength
-    ORDER BY Strength DESC
-    LIMIT 30`)
+    const results = await session.run(`
+      MATCH (user:User {id:"${userId}"})
+      CALL {
+      MATCH (user)-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(user3:User),
+      (user3)-[:FOLLOWS]->(user4:User)-[:LIKES]->(restaurant:Restaurant)
+      WHERE NOT EXISTS((user)-[:LIKES]->(:Restaurant))
+      RETURN 'suggested' as type, restaurant AS SuggestedRestaurants, count(*) AS Strength
+      UNION
+      MATCH (user)-[:LIKES]->(:Restaurant)<-[:LIKES]-(otherUser:User),
+      (otherUser)-[:LIKES]->(otherRestaurant:Restaurant)
+      WHERE NOT EXISTS((user)-[:LIKES]->(otherRestaurant))
+      RETURN 'otherSuggested' as type, 
+      otherRestaurant AS SuggestedRestaurants, count(*) AS Strength
+      }
+      RETURN type, SuggestedRestaurants, Strength
+      ORDER BY Strength DESC
+      LIMIT 30
+    `)
     return results.records.map((r) => {
       return r.get('SuggestedRestaurants').properties
+    })
+  }
+
+  async suggestOtherRecipesCat(userId: string): Promise<any> {
+    const session = Neo4jClient.session()
+    const results = await session.run(`
+        match (u:User {id:"${userId}"})
+        match (u)-[:LIKES]->(r:Recipes)
+        match (rec:Recipes)
+        where rec.category = r.category
+        return distinct rec.name as CategoryName, 
+        rec.category as CategoryType limit 10
+      `)
+    return results.records.map((r) => {
+      return r.get('CategoryName')
     })
   }
 }
