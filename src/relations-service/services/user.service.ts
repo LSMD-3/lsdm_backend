@@ -81,7 +81,7 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
     const results = await session.run(`MATCH (user1:User {id:"${userId}"})-[:FOLLOWS]->(user2:User)-[:FOLLOWS]->(otherFriends1:User),
     (otherFriends1)-[:FOLLOWS]->(user3:User)-[:FOLLOWS]->(otherFriends2:User) RETURN otherFriends2 AS SuggestedFriends, count(*)AS Strength
     ORDER BY Strength DESC
-    LIMIT 10`)
+    LIMIT 30`)
     return results.records.map((r) => {
       return r.get('SuggestedFriends').properties
     })
@@ -102,7 +102,7 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
     }
     RETURN type, SuggestedRecipes, Strength
     ORDER BY Strength DESC
-    LIMIT 9`)
+    LIMIT 30`)
     return results.records.map((r) => {
       return r.get('SuggestedRecipes').properties
     })
@@ -123,7 +123,7 @@ class UserService extends BaseNeo4jService<UserNodeProps> {
     }
     RETURN type, SuggestedRestaurants, Strength
     ORDER BY Strength DESC
-    LIMIT 10`)
+    LIMIT 30`)
     return results.records.map((r) => {
       return r.get('SuggestedRestaurants').properties
     })
