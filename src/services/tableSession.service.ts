@@ -575,6 +575,83 @@ class TableSessionService extends AbstractService<ITableSession> {
     ])
     return result
   }
+
+  public async getRecipesPokedex(userId: string) {
+    const result = await TableSession.aggregate([
+      {
+        $match: {
+          'partecipants._id': userId,
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $match: {
+          'orders.client._id': userId,
+        },
+      },
+      {
+        $project: {
+          restaurant: 1,
+          recipes: '$orders.recipes',
+        },
+      },
+      {
+        $unwind: {
+          path: '$recipes',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            restaurantId: '$restaurant._id',
+            recipeId: '$recipes._id',
+          },
+          recipe: {
+            $first: '$recipes',
+          },
+          restaurant: {
+            $first: '$restaurant',
+          },
+          quantity: {
+            $sum: '$recipes.qty',
+          },
+        },
+      },
+      {
+        $project: {
+          _id: false,
+          restaurant: 1,
+          recipe: {
+            _id: 1,
+            ingredients: 1,
+            recipe_name: 1,
+            image_url: 1,
+            quantity: '$quantity',
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$restaurant',
+          recipes: {
+            $push: '$recipe',
+          },
+        },
+      },
+      {
+        $project: {
+          _id: false,
+          restaurant: '$_id',
+          recipes: 1,
+        },
+      },
+    ])
+    return result
+  }
 }
 
 export default new TableSessionService()

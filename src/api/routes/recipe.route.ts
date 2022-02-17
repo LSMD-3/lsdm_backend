@@ -10,6 +10,15 @@ const route = Router()
 export default (app: Router) => {
   app.use('/recipe', route)
 
+  route.get('/image/:recipeId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const recipesImages = await Recipe.findOne({ _id: req.params.recipeId }, 'image_url')
+      res.json(recipesImages)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   route.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const categories = await RecipeService.getCategories()

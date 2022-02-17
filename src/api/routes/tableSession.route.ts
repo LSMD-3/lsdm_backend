@@ -108,9 +108,19 @@ export default (app: Router) => {
       handleError(res, e)
     }
   })
+
   route.get('/getMostOrderedRecipeForComune/', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await TableSessionService.getMostOrderedRecipeForComune()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/getRecipesPokedex/:userId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getRecipesPokedex(req.params.userId)
       res.json(response)
     } catch (e) {
       handleError(res, e)
