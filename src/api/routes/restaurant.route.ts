@@ -14,7 +14,12 @@ export default (app: Router) => {
 
   route.get('/limit/:limit', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await Restaurant.find({ menus: { $ne: null } }, 'menus tipologia nome comune').limit(Number(req.params.limit))
+      const response = await Restaurant.aggregate([
+        { $match: { menus: { $ne: null } } },
+        { $sample: { size: Number(req.params.limit ?? 100) } },
+        { $project: { menus: 1, tipologia: 1, nome: 1, comune: 1 } },
+      ])
+
       res.json(response)
     } catch (e) {
       handleError(res, e)

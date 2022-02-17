@@ -263,6 +263,7 @@ class TableSessionService extends AbstractService<ITableSession> {
         },
       },
       { $sort: { restaurant_count: -1, recipe_count: -1 } },
+      { $limit: 10 },
     ])
     return result
   }
@@ -286,6 +287,7 @@ class TableSessionService extends AbstractService<ITableSession> {
         },
       },
       { $sort: { number_of_visitors: -1 } },
+      { $limit: 10 },
     ])
     return result
   }
@@ -306,6 +308,7 @@ class TableSessionService extends AbstractService<ITableSession> {
         },
       },
       { $sort: { number_of_total_orders: -1 } },
+      { $limit: 10 },
     ])
     return result
   }
@@ -346,6 +349,102 @@ class TableSessionService extends AbstractService<ITableSession> {
         },
       },
       { $sort: { unique_recipes: -1 } },
+      { $limit: 10 },
+    ])
+    return result
+  }
+
+  public async getRevenueByComune() {
+    const result = await TableSession.aggregate([
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $project: {
+          restaurant: 1,
+          recipe_revenue: {
+            $multiply: ['$orders.recipes.price', '$orders.recipes.qty'],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$restaurant',
+          revenues: {
+            $sum: '$recipe_revenue',
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.comune',
+          comune_revenue: {
+            $sum: '$revenues',
+          },
+        },
+      },
+      {
+        $sort: {
+          comune_revenue: -1,
+        },
+      },
+      {
+        $project: {
+          comune: '$_id',
+          comune_revenue: 1,
+        },
+      },
+      { $limit: 10 },
+    ])
+    return result
+  }
+
+  public async getRestaurantRevenue(restaurantId: string) {
+    const result = await TableSession.aggregate([
+      {
+        $match: {
+          'restaurant._id': restaurantId,
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $project: {
+          restaurant: 1,
+          recipe_revenue: {
+            $multiply: ['$orders.recipes.price', '$orders.recipes.qty'],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$restaurant',
+          total_revenue: {
+            $sum: '$recipe_revenue',
+          },
+        },
+      },
+      {
+        $project: {
+          restaurant: '$_id',
+          total_revenue: '$total_revenue',
+        },
+      },
     ])
     return result
   }

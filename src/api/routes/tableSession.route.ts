@@ -74,5 +74,23 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/getRevenueByComune', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getRevenueByComune()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/getRestaurantRevenue/:restaurantId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getRestaurantRevenue(req.params.restaurantId)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, TableSessionService)
 }
