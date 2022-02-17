@@ -10,21 +10,14 @@ export default (app: Router) => {
   app.use('/neo4j/restaurant', route)
 
   //Add User Route
-  route.post(
-    '/create',
-    body('_id').isString(),
-    body('name').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { _id, name } = req.body
-        const result = await NeoRestaurantService.createNode({ _id, name })
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  route.get('/mostLiked', validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await NeoRestaurantService.getMostLikedRestaurants(10)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //Recipe found In Restaurant
   route.post(
@@ -34,7 +27,7 @@ export default (app: Router) => {
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const result = await NeoRestaurantService.createRelation(req.body.restaurantId, 'HAS', req.body.recipeId, 'Recipe')
+        const result = await NeoRestaurantService.createRelation(req.body.restaurantId, 'HAS', req.body.recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)
@@ -42,7 +35,7 @@ export default (app: Router) => {
     }
   )
 
-  //Recipe found In Restaurant
+  //Recipes found In Restaurant
   route.delete(
     '/hasRecipe',
     body('restaurantId').isString(),
@@ -50,7 +43,7 @@ export default (app: Router) => {
     validateInput,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const result = await NeoRestaurantService.deleteRelation(req.body.restaurantId, 'HAS', req.body.recipeId, 'Recipe')
+        const result = await NeoRestaurantService.deleteRelation(req.body.restaurantId, 'HAS', req.body.recipeId, 'Recipes')
         res.json(result)
       } catch (e) {
         handleError(res, e)

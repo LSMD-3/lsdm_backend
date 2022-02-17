@@ -18,7 +18,7 @@ class RecipeService extends BaseNeo4jService<RecipeNodeProps> {
 
     try {
       const results = await session.run(`
-      MATCH (u:User)-[l:LIKES]->(r:Restaurant)
+      MATCH (u:User)-[l:LIKES]->(r:Recipes)
       RETURN r, COUNT(l)
       ORDER BY COUNT(l)
       LIMIT ${limit}`)

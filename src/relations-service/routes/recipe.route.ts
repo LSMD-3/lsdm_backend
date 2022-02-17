@@ -9,22 +9,15 @@ const route = Router()
 export default (app: Router) => {
   app.use('/neo4j/recipe', route)
 
-  //Add Recipe Route
-  route.post(
-    '/create',
-    body('_id').exists(),
-    body('name').isString(),
-    validateInput,
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const { _id, name } = req.body
-        const result = await NeoRecipeService.createNode({ _id, name })
-        res.json(result)
-      } catch (e) {
-        handleError(res, e)
-      }
+  //Add User Route
+  route.get('/mostLiked/:restaurantId', validateInput, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await NeoRecipeService.getMostLikedRecipes(3, req.params.restaurantId)
+      res.json(result)
+    } catch (e) {
+      handleError(res, e)
     }
-  )
+  })
 
   //Delete All Nodes
   route.delete('/all', validateInput, async (req: Request, res: Response, next: NextFunction) => {
