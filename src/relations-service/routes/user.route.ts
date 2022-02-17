@@ -198,7 +198,6 @@ export default (app: Router) => {
   route.get('/likedRecipes/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await NeoUserService.getLikedRecipes(req.params.userId)
-
       res.json(result)
     } catch (error) {
       handleError(res, error)
@@ -209,10 +208,7 @@ export default (app: Router) => {
   route.get('/suggestfriends/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await NeoUserService.suggestOtherFriends(req.params.userId)
-      // todo remove from here
-      const users = await User.find({ _id: { $in: result } }, 'name surname')
-
-      res.json(users)
+      res.json(result)
     } catch (error) {
       handleError(res, error)
     }
@@ -222,9 +218,7 @@ export default (app: Router) => {
   route.get('/suggestrecipes/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await NeoUserService.suggestOtherRecipes(req.params.userId)
-      const recipes = await Recipe.find({ _id: { $in: result } }, 'recipe_name')
-
-      res.json(recipes)
+      res.json(result)
     } catch (error) {
       handleError(res, error)
     }
@@ -234,9 +228,7 @@ export default (app: Router) => {
   route.get('/suggestrestaurants/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await NeoUserService.suggestOtherRestaurants(req.params.userId)
-      const restaurants = await Restaurant.find({ _id: { $in: result } }, 'nome')
-
-      res.json(restaurants)
+      res.json(result)
     } catch (error) {
       handleError(res, error)
     }

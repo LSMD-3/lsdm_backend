@@ -4,12 +4,10 @@ class UserGenerator {
   async generateRandomUserFollows(userId: string, n: number) {
     // TODO
     const session = Neo4jClient.session()
-    await session.run(`
-  
-  WITH ${n} as followRange
-      MATCH (u:Users)
+    await session.run(`WITH ${n} as followRange
+      MATCH (u:User)
       WITH collect(u) as allusers, followRange
-      MATCH (u2:Users) WHERE u2.id = "${userId}"
+      MATCH (u2:User) WHERE u2.id = "${userId}"
       WITH u2, apoc.coll.randomItems(allusers, followRange) as allusers
       FOREACH (user in allusers | CREATE (user)-[:FOLLOWS]->(u2))
   `)
@@ -28,9 +26,9 @@ class UserGenerator {
     await session.run(`
   
   WITH ${n} as likeRange
-      MATCH (r:Restaurants)
+      MATCH (r:Restaurant)
       WITH collect(r) as allrestaurants, likeRange
-      MATCH (u2:Users) WHERE u2.id = "${userId}"
+      MATCH (u2:User) WHERE u2.id = "${userId}"
       WITH u2, apoc.coll.randomItems(allrestaurants, likeRange) as allrestaurants
       FOREACH (restaurant in allrestaurants | CREATE (u2)-[:LIKES]->(restaurant))
   `)
@@ -46,7 +44,7 @@ class UserGenerator {
   WITH ${n} as likeRange
       MATCH (r:Recipes)
       WITH collect(r) as allrecipes, likeRange
-      MATCH (u2:Users) WHERE u2.id = "${userId}"
+      MATCH (u2:User) WHERE u2.id = "${userId}"
       WITH u2, apoc.coll.randomItems(allrecipes, likeRange) as allrecipes
       FOREACH (recipe in allrecipes | CREATE (u2)-[:LIKES]->(recipe))
   `)

@@ -50,7 +50,7 @@ class TableSessionService extends AbstractService<ITableSession> {
         ordersToSave.push({ client: parsed_orders[1], recipes: parsed_orders[0] })
       }
 
-      let parsed_partecipants = JSON.parse(partecipants[0])
+      let parsed_partecipants = (partecipants && partecipants[0] && partecipants[0].length) > 0 ? JSON.parse(partecipants[0]) : []
       const session = new TableSession({
         restaurant: restaurant,
         tableId: table,
@@ -219,6 +219,134 @@ class TableSessionService extends AbstractService<ITableSession> {
       })
 
     const result = await TableSession.aggregate(pipeline)
+    return result
+  }
+
+  public async getTopRecipesOfTopVisitedRestaurants() {
+    const result = await TableSession.aggregate([
+      {
+        $group: {
+          recipes: {
+            $first: '$orders.recipes',
+          },
+          name: {
+            $first: '$restaurant.nome',
+          },
+          _id: '$restaurant._id',
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+      { $unwind: { path: '$recipes' } },
+      { $unwind: { path: '$recipes' } },
+      {
+        $group: {
+          restaurant_name: {
+            $first: '$name',
+          },
+          recipe_name: {
+            $first: '$recipes.recipe_name',
+          },
+          restaurant_count: {
+            $first: '$count',
+          },
+          _id: '$recipes._id',
+          recipe_count: {
+            $sum: '$recipes.qty',
+          },
+        },
+      },
+      { $sort: { restaurant_count: -1, recipe_count: -1 } },
+    ])
+    return result
+  }
+
+  public async getMostVisitedRestaurant() {
+    const result = await TableSession.aggregate([
+      {
+        $unwind: {
+          path: '$partecipants',
+        },
+      },
+      {
+        $group: {
+          restaurant_name: {
+            $first: '$restaurant.nome',
+          },
+          _id: '$restaurant._id',
+          number_of_visitors: {
+            $sum: 1,
+          },
+        },
+      },
+      { $sort: { number_of_visitors: -1 } },
+    ])
+    return result
+  }
+
+  public async getRestaurantWithMoreDistinctOrders() {
+    const result = await TableSession.aggregate([
+      {
+        $group: {
+          _id: '$restaurant._id',
+          restaurant_name: {
+            $first: '$restaurant.nome',
+          },
+          number_of_total_orders: {
+            $sum: {
+              $size: '$orders',
+            },
+          },
+        },
+      },
+      { $sort: { number_of_total_orders: -1 } },
+    ])
+    return result
+  }
+
+  public async countUniqueRecipes() {
+    const result = await TableSession.aggregate([
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $group: {
+          restaurant_name: {
+            $first: '$restaurant.nome',
+          },
+          _id: '$restaurant._id',
+          recipes: {
+            $addToSet: '$orders.recipes.recipe_name',
+          },
+        },
+      },
+      { $unwind: { path: '$recipes' } },
+      {
+        $group: {
+          restaurant_name: {
+            $first: '$restaurant_name',
+          },
+          _id: '$_id',
+          unique_recipes: {
+            $sum: 1,
+          },
+        },
+      },
+      { $sort: { unique_recipes: -1 } },
+    ])
     return result
   }
 }

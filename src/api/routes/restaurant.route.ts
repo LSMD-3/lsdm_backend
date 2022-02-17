@@ -12,6 +12,15 @@ const route = Router()
 export default (app: Router) => {
   app.use('/restaurant', route)
 
+  route.get('/limit/:limit', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await Restaurant.find({ menus: { $ne: null } }, 'menus tipologia nome comune').limit(Number(req.params.limit))
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   route.post('/get_all', body('map').exists().isString(), validateInput, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await RestaurantService.getall(req.body.map)
@@ -372,7 +381,7 @@ export default (app: Router) => {
 
   route.get('/noMenu/:limit', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const restaurants = await Restaurant.find({ menu: null }, 'nome').limit(Number(req.params.limit) ?? 10)
+      const restaurants = await Restaurant.find({ menus: null }, 'nome').limit(Number(req.params.limit) ?? 10)
       res.json(restaurants)
     } catch (e) {
       handleError(res, e)
@@ -381,7 +390,7 @@ export default (app: Router) => {
 
   route.get('/withMenu/:limit', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const restaurants = await Restaurant.find({ menu: { $ne: null } }, 'nome').limit(Number(req.params.limit) ?? 10)
+      const restaurants = await Restaurant.find({ menus: { $ne: null } }, 'nome').limit(Number(req.params.limit) ?? 10)
       res.json(restaurants)
     } catch (e) {
       handleError(res, e)

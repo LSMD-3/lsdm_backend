@@ -31,7 +31,9 @@ export default (app: Router) => {
   route.get('/normalUser/:limit', async (req: Request, res: Response, next: NextFunction) => {
     try {
       // console.log(req.params.userId);
-      const users = await User.find({ userType: 'user' }, 'name').limit(Number(req.params.limit) ?? 10)
+      const limit = Number(req.params.limit) ?? 10
+      const users = await User.aggregate([{ $sample: { size: limit } }, { $project: { name: 1, surname: 1, email: 1 } }])
+
       res.json(users)
     } catch (e) {
       handleError(res, e)

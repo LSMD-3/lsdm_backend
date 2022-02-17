@@ -6,6 +6,7 @@ import recipe from './routes/recipe.route'
 import tableSession from './routes/tableSession.route'
 import importRoute from './routes/import.route'
 import menu from './routes/menu.route'
+import userGenerator from './routes/userGenerator.route'
 import { attachRelationServiceRoutes } from '@/relations-service'
 
 export default () => {
@@ -18,6 +19,7 @@ export default () => {
   importRoute(app)
   attachRelationServiceRoutes(app)
   tableSession(app)
+  userGenerator(app)
 
   return app
 }
