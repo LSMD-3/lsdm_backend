@@ -215,13 +215,23 @@ export default (app: Router) => {
     }
   })
 
-  //Get Recipes Suggestion
+  //Get Recipes Suggestion based on followfriends and their other likes
   route.get('/suggestrecipes/:userId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await NeoUserService.suggestOtherRecipes(req.params.userId)
       const recipes = await Recipe.find({ _id: { $in: result } }, 'recipe_name')
 
       res.json(recipes)
+    } catch (error) {
+      handleError(res, error)
+    }
+  })
+
+  //Get Recipes Suggestion based on liked recipes category
+  route.get('/suggestrecipescat/:userId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await NeoUserService.suggestOtherRecipesCat(req.params.userId)
+      res.json(result)
     } catch (error) {
       handleError(res, error)
     }
