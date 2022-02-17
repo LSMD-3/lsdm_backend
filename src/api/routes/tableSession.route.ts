@@ -38,5 +38,41 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/getTopRecipesOfTopVisitedRestaurants', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getTopRecipesOfTopVisitedRestaurants()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/getMostVisitedRestaurant', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getMostVisitedRestaurant()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/getRestaurantWithMoreDistinctOrders', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getRestaurantWithMoreDistinctOrders()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
+  route.get('/countUniqueRecipes', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.countUniqueRecipes()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, TableSessionService)
 }
