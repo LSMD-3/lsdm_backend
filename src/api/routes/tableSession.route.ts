@@ -92,5 +92,30 @@ export default (app: Router) => {
     }
   })
 
+  route.get('/getMostOrderedRecipeForUser/:userId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getMostOrderedRecipeForUser(req.params.userId)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+  route.get('/getMostOrderedRecipesInARestaurant/:restaurantId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getMostOrderedRecipesInARestaurant(req.params.restaurantId)
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+  route.get('/getMostOrderedRecipeForComune/', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await TableSessionService.getMostOrderedRecipeForComune()
+      res.json(response)
+    } catch (e) {
+      handleError(res, e)
+    }
+  })
+
   abstractRoute(route, TableSessionService)
 }

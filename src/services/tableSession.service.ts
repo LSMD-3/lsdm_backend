@@ -448,6 +448,133 @@ class TableSessionService extends AbstractService<ITableSession> {
     ])
     return result
   }
+
+  public async getMostOrderedRecipeForUser(userId: string) {
+    const result = await TableSession.aggregate([
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $match: {
+          'orders.client._id': userId,
+        },
+      },
+      {
+        $group: {
+          recipe_name: {
+            $first: '$orders.recipes.recipe_name',
+          },
+          _id: '$orders.recipes._id',
+          count: {
+            $sum: '$orders.recipes.qty',
+          },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ])
+    return result
+  }
+  public async getMostOrderedRecipeForComune() {
+    const result = await TableSession.aggregate([
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $group: {
+          orders: {
+            $first: '$orders',
+          },
+          recipe_name: {
+            $first: '$orders.recipes.recipe_name',
+          },
+          _id: {
+            rest_id: 'orders.recipes._id',
+            rest_comune: '$restaurant.comune',
+          },
+          count: {
+            $sum: '$orders.recipes.qty',
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.rest_comune',
+          recipe_name: {
+            $first: '$recipe_name',
+          },
+          count: {
+            $max: '$count',
+          },
+        },
+      },
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ])
+    return result
+  }
+  public async getMostOrderedRecipesInARestaurant(restaurantId: string) {
+    const result = await TableSession.aggregate([
+      {
+        $match: {
+          'restaurant._id': restaurantId,
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders',
+        },
+      },
+      {
+        $unwind: {
+          path: '$orders.recipes',
+        },
+      },
+      {
+        $group: {
+          recipe_name: {
+            $first: '$orders.recipes.recipe_name',
+          },
+          _id: '$orders.recipes._id',
+          count: {
+            $sum: '$orders.recipes.qty',
+          },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ])
+    return result
+  }
 }
 
 export default new TableSessionService()
